@@ -16,7 +16,7 @@ namespace ModernApiProject.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "StudentOnly")]
     public class StandaloneController : ControllerBase
     {
         private readonly IStandaloneService _standaloneService;

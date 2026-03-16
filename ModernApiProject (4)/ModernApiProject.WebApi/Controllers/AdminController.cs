@@ -5,21 +5,27 @@ using ModernApiProject.Application.Interfaces;
 using ModernApiProject.Application.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace ModernApiProject.WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")] 
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
         private readonly ILogger<AdminController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public AdminController(IAdminService adminService, ILogger<AdminController> logger)
+        public AdminController(IAdminService adminService, ILogger<AdminController> logger, IConfiguration configuration)
         {
             _adminService = adminService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpPost("validate-password")]
@@ -304,16 +310,40 @@ namespace ModernApiProject.WebApi.Controllers
             try
             {
                 if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
-                {
                     return BadRequest("Username and password are required");
-                }
 
                 var admin = await _adminService.AuthenticateAdminAsync(model.Username, model.Password);
-                if (admin != null)
+                if (admin == null)
+                    return Unauthorized("Invalid credentials");
+
+                // Generate JWT with "Admin" UserType claim
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var secretKey = _configuration["Jwt:SecretKey"] ?? "your-super-secret-key-must-be-at-least-32-characters";
+                var key = Encoding.ASCII.GetBytes(secretKey);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
                 {
-                    return Ok(admin);
-                }
-                return Unauthorized("Invalid credentials");
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, admin.Username),
+                        new Claim(ClaimTypes.Name, admin.Username),
+                        new Claim("UserType", "Admin")   // <-- key differentiator
+                    }),
+                    Expires = DateTime.UtcNow.AddMinutes(60),
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha256Signature),
+                    Issuer = _configuration["Jwt:Issuer"] ?? "ModernApiProject",
+                    Audience = _configuration["Jwt:Audience"] ?? "ModernApiProject"
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                return Ok(new {
+                    token = tokenString,
+                    admin = admin
+                });
             }
             catch (System.Exception ex)
             {

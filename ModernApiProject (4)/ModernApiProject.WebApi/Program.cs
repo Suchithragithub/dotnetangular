@@ -103,6 +103,15 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("UserType", "Admin"));
+
+    options.AddPolicy("StudentOnly", policy =>
+        policy.RequireClaim("UserType", "Student"));
+});
+
 // Configure CORS (optional but recommended for web clients)
 builder.Services.AddCors(options =>
 {
