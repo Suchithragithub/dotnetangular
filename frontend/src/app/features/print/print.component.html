@@ -1,0 +1,172 @@
+<div class="container-fluid py-4">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading()" class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error()" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ error() }}
+    <button type="button" class="btn-close" (click)="error.set(null)" aria-label="Close"></button>
+  </div>
+
+  <!-- Print Content -->
+  <div *ngIf="!loading() && !error() && enrollmentData()" class="print-container">
+    <!-- Action Buttons (Hidden on Print) -->
+    <div class="no-print mb-4 d-flex justify-content-between">
+      <button type="button" class="btn btn-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>Back
+      </button>
+      <button type="button" class="btn btn-primary" (click)="printPage()">
+        <i class="bi bi-printer me-2"></i>Print
+      </button>
+    </div>
+
+    <!-- Printable Enrollment Record -->
+    <div class="card shadow-sm">
+      <div class="card-body p-5">
+        <!-- Header -->
+        <div class="text-center mb-5">
+          <h1 class="display-6 fw-bold text-primary mb-2">Course Enrollment Record</h1>
+          <p class="text-muted mb-0">Official Academic Document</p>
+          <hr class="my-4">
+        </div>
+
+        <!-- Student Information Section -->
+        <div class="mb-5">
+          <h3 class="h5 fw-bold text-secondary mb-4 border-bottom pb-2">
+            <i class="bi bi-person-badge me-2"></i>Student Information
+          </h3>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Registration Number:</strong>
+                <span class="ms-2">{{ enrollmentData()?.student?.regno || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Full Name:</strong>
+                <span class="ms-2">{{ enrollmentData()?.student?.name || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Email:</strong>
+                <span class="ms-2">{{ enrollmentData()?.student?.email || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">CGPA:</strong>
+                <span class="ms-2">{{ enrollmentData()?.student?.cgpa || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Information Section -->
+        <div class="mb-5">
+          <h3 class="h5 fw-bold text-secondary mb-4 border-bottom pb-2">
+            <i class="bi bi-mortarboard me-2"></i>Academic Information
+          </h3>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Department:</strong>
+                <span class="ms-2">{{ enrollmentData()?.department?.name || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Level:</strong>
+                <span class="ms-2">{{ enrollmentData()?.level?.name || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Session:</strong>
+                <span class="ms-2">{{ enrollmentData()?.session?.name || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Semester:</strong>
+                <span class="ms-2">{{ enrollmentData()?.semester?.name || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Course Information Section -->
+        <div class="mb-5">
+          <h3 class="h5 fw-bold text-secondary mb-4 border-bottom pb-2">
+            <i class="bi bi-book me-2"></i>Course Information
+          </h3>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Course Code:</strong>
+                <span class="ms-2">{{ enrollmentData()?.course?.code || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Course Name:</strong>
+                <span class="ms-2">{{ enrollmentData()?.course?.name || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Credit Units:</strong>
+                <span class="ms-2">{{ enrollmentData()?.course?.unit || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Seat Limit:</strong>
+                <span class="ms-2">{{ enrollmentData()?.course?.seat || 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-12" *ngIf="enrollmentData()?.enrollmentDate">
+              <div class="d-flex">
+                <strong class="text-muted" style="min-width: 180px;">Enrollment Date:</strong>
+                <span class="ms-2">{{ enrollmentData()?.enrollmentDate }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-5 pt-4 border-top">
+          <div class="row">
+            <div class="col-md-6">
+              <p class="text-muted mb-1">
+                <small><strong>Print Date:</strong> {{ getCurrentDate() }}</small>
+              </p>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <p class="text-muted mb-1">
+                <small><strong>Document ID:</strong> {{ enrollmentData()?.student?.regno }}-{{ enrollmentData()?.course?.code }}</small>
+              </p>
+            </div>
+          </div>
+          <div class="text-center mt-4">
+            <p class="text-muted mb-0">
+              <small><em>This is an official enrollment record generated by the Course Enrollment Management System.</em></small>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div *ngIf="!loading() && !error() && !enrollmentData()" class="alert alert-info text-center" role="alert">
+    <i class="bi bi-info-circle me-2"></i>
+    No enrollment data available for the specified registration number.
+  </div>
+</div>

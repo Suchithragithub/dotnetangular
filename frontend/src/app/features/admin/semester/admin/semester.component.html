@@ -1,0 +1,125 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Semester Management</h2>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="row" *ngIf="successMessage()">
+    <div class="col-12">
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ successMessage() }}
+        <button type="button" class="btn-close" (click)="successMessage.set(null)" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="row" *ngIf="error()">
+    <div class="col-12">
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error() }}
+        <button type="button" class="btn-close" (click)="error.set(null)" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="row" *ngIf="loading()">
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Processing...</p>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="!loading()">
+    <!-- Create Semester Form -->
+    <div class="col-lg-4 col-md-5 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Create New Semester</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="semesterForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="semester" class="form-label">Semester Name <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="semester"
+                class="form-control"
+                formControlName="semester"
+                placeholder="e.g., First Semester, Second Semester"
+                [class.is-invalid]="semesterControl?.invalid && semesterControl?.touched"
+              />
+              <div class="invalid-feedback" *ngIf="semesterControl?.invalid && semesterControl?.touched">
+                <span *ngIf="semesterControl?.errors?.['required']">Semester name is required.</span>
+                <span *ngIf="semesterControl?.errors?.['minlength']">Semester name must be at least 1 character.</span>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="semesterForm.invalid || loading()"
+              >
+                <span *ngIf="!loading()">Create Semester</span>
+                <span *ngIf="loading()">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Creating...
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semesters List -->
+    <div class="col-lg-8 col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">All Semesters</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="semesters().length === 0" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">No semesters found. Create your first semester using the form.</p>
+          </div>
+
+          <div *ngIf="semesters().length > 0" class="table-responsive">
+            <table class="table table-hover table-striped align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Semester Name</th>
+                  <th scope="col" class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let semester of semesters(); let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ semester.semester }}</td>
+                  <td class="text-center">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-danger"
+                      (click)="deleteSemester(semester.id!)"
+                      [disabled]="loading()"
+                      title="Delete semester"
+                    >
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

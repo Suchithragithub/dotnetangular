@@ -1,0 +1,272 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="bi bi-pencil-square me-2"></i>Course Enrollment
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Loading Spinner -->
+          <div *ngIf="loading()" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Processing...</p>
+          </div>
+
+          <!-- Error Alert -->
+          <div *ngIf="error()" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error() }}
+            <button type="button" class="btn-close" (click)="error.set(null)"></button>
+          </div>
+
+          <!-- Success Alert -->
+          <div *ngIf="success()" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ success() }}
+            <button type="button" class="btn-close" (click)="success.set(null)"></button>
+          </div>
+
+          <!-- Pincode Verification Form -->
+          <div *ngIf="!pincodeVerified() && !loading()">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              Please verify your identity by entering your registration number and pincode.
+            </div>
+
+            <form [formGroup]="pincodeForm" (ngSubmit)="onVerifyPincode()">
+              <div class="mb-3">
+                <label for="studentregno" class="form-label">
+                  Registration Number <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="studentregno"
+                  formControlName="studentregno"
+                  placeholder="Enter your registration number"
+                  [class.is-invalid]="pincodeForm.get('studentregno')?.invalid && pincodeForm.get('studentregno')?.touched"
+                />
+                <div
+                  *ngIf="pincodeForm.get('studentregno')?.invalid && pincodeForm.get('studentregno')?.touched"
+                  class="invalid-feedback"
+                >
+                  Registration number is required.
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="Pincode" class="form-label">
+                  Pincode <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="Pincode"
+                  formControlName="Pincode"
+                  placeholder="Enter your pincode"
+                  [class.is-invalid]="pincodeForm.get('Pincode')?.invalid && pincodeForm.get('Pincode')?.touched"
+                />
+                <div
+                  *ngIf="pincodeForm.get('Pincode')?.invalid && pincodeForm.get('Pincode')?.touched"
+                  class="invalid-feedback"
+                >
+                  Pincode is required.
+                </div>
+              </div>
+
+              <div class="d-grid">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="pincodeForm.invalid || loading()"
+                >
+                  <i class="bi bi-shield-check me-2"></i>Verify Pincode
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Enrollment Form -->
+          <div *ngIf="pincodeVerified() && !loading()">
+            <!-- Student Information -->
+            <div class="alert alert-success mb-4" *ngIf="studentData()">
+              <h6 class="alert-heading">
+                <i class="bi bi-person-check-fill me-2"></i>Student Information
+              </h6>
+              <hr>
+              <div class="row">
+                <div class="col-md-6">
+                  <p class="mb-1"><strong>Name:</strong> {{ studentData()?.name }}</p>
+                  <p class="mb-1"><strong>Registration No:</strong> {{ studentData()?.regno }}</p>
+                </div>
+                <div class="col-md-6">
+                  <p class="mb-1"><strong>Email:</strong> {{ studentData()?.email }}</p>
+                  <p class="mb-0"><strong>CGPA:</strong> {{ studentData()?.cgpa || 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <form [formGroup]="enrollmentForm" (ngSubmit)="onSubmitEnrollment()">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="session" class="form-label">
+                    Session <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    class="form-select"
+                    id="session"
+                    formControlName="session"
+                    [class.is-invalid]="enrollmentForm.get('session')?.invalid && enrollmentForm.get('session')?.touched"
+                  >
+                    <option value="">Select Session</option>
+                    <option *ngFor="let session of sessions()" [value]="session.id">
+                      {{ session.name }}
+                    </option>
+                  </select>
+                  <div
+                    *ngIf="enrollmentForm.get('session')?.invalid && enrollmentForm.get('session')?.touched"
+                    class="invalid-feedback"
+                  >
+                    Session is required.
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="department" class="form-label">
+                    Department <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    class="form-select"
+                    id="department"
+                    formControlName="department"
+                    [class.is-invalid]="enrollmentForm.get('department')?.invalid && enrollmentForm.get('department')?.touched"
+                  >
+                    <option value="">Select Department</option>
+                    <option *ngFor="let dept of departments()" [value]="dept.id">
+                      {{ dept.name }}
+                    </option>
+                  </select>
+                  <div
+                    *ngIf="enrollmentForm.get('department')?.invalid && enrollmentForm.get('department')?.touched"
+                    class="invalid-feedback"
+                  >
+                    Department is required.
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="level" class="form-label">
+                    Level <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    class="form-select"
+                    id="level"
+                    formControlName="level"
+                    [class.is-invalid]="enrollmentForm.get('level')?.invalid && enrollmentForm.get('level')?.touched"
+                  >
+                    <option value="">Select Level</option>
+                    <option *ngFor="let level of levels()" [value]="level.id">
+                      {{ level.name }}
+                    </option>
+                  </select>
+                  <div
+                    *ngIf="enrollmentForm.get('level')?.invalid && enrollmentForm.get('level')?.touched"
+                    class="invalid-feedback"
+                  >
+                    Level is required.
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="sem" class="form-label">
+                    Semester <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    class="form-select"
+                    id="sem"
+                    formControlName="sem"
+                    [class.is-invalid]="enrollmentForm.get('sem')?.invalid && enrollmentForm.get('sem')?.touched"
+                  >
+                    <option value="">Select Semester</option>
+                    <option *ngFor="let semester of semesters()" [value]="semester.id">
+                      {{ semester.name }}
+                    </option>
+                  </select>
+                  <div
+                    *ngIf="enrollmentForm.get('sem')?.invalid && enrollmentForm.get('sem')?.touched"
+                    class="invalid-feedback"
+                  >
+                    Semester is required.
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="course" class="form-label">
+                  Course <span class="text-danger">*</span>
+                </label>
+                <select
+                  class="form-select"
+                  id="course"
+                  formControlName="course"
+                  [class.is-invalid]="enrollmentForm.get('course')?.invalid && enrollmentForm.get('course')?.touched"
+                >
+                  <option value="">Select Course</option>
+                  <option *ngFor="let course of courses()" [value]="course.id">
+                    {{ course.coursecode }} - {{ course.coursename }} ({{ course.unit }} units)
+                  </option>
+                </select>
+                <div
+                  *ngIf="enrollmentForm.get('course')?.invalid && enrollmentForm.get('course')?.touched"
+                  class="invalid-feedback"
+                >
+                  Course is required.
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-primary flex-grow-1"
+                  [disabled]="enrollmentForm.invalid || loading()"
+                >
+                  <i class="bi bi-check-circle me-2"></i>Submit Enrollment
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="resetForm()"
+                  [disabled]="loading()"
+                >
+                  <i class="bi bi-arrow-counterclockwise me-2"></i>Reset
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Help Information -->
+      <div class="card mt-3 border-info">
+        <div class="card-body">
+          <h6 class="card-title text-info">
+            <i class="bi bi-info-circle me-2"></i>Enrollment Instructions
+          </h6>
+          <ul class="mb-0 small">
+            <li>Verify your identity using your registration number and pincode</li>
+            <li>Select the appropriate session, department, level, and semester</li>
+            <li>Choose the course you wish to enroll in</li>
+            <li>The system will check for duplicate enrollments and seat availability</li>
+            <li>Upon successful enrollment, you will be redirected to your enrollment history</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

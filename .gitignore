@@ -1,0 +1,27 @@
+# Angular
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Environment
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build
+publish/

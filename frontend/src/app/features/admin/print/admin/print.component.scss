@@ -1,0 +1,81 @@
+:host {
+  display: block;
+
+  .print-container {
+    background: white;
+    padding: 2rem;
+  }
+
+  .print-header {
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .table {
+    font-size: 0.9rem;
+
+    th {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .print-footer {
+    page-break-inside: avoid;
+  }
+
+  // Print-specific styles
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    .print-container {
+      padding: 0;
+    }
+
+    .card {
+      border: 1px solid #dee2e6 !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+    }
+
+    .card-header {
+      background-color: #f8f9fa !important;
+      color: #000 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .table {
+      font-size: 0.85rem;
+    }
+
+    .table-dark {
+      background-color: #343a40 !important;
+      color: white !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .badge {
+      border: 1px solid #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .print-footer {
+      margin-top: 3rem;
+    }
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+}

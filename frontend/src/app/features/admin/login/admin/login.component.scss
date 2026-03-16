@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  height: 100%;
+
+  .card {
+    border-radius: 1rem;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .input-group-text {
+    border-right: none;
+  }
+
+  .input-group .form-control {
+    border-left: none;
+
+    &:focus {
+      border-left: none;
+      box-shadow: none;
+    }
+  }
+
+  .input-group:focus-within .input-group-text {
+    border-color: #86b7fe;
+  }
+
+  .btn-primary {
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .alert {
+    border-radius: 0.5rem;
+  }
+
+  @media (max-width: 576px) {
+    .card-body {
+      padding: 1.5rem !important;
+    }
+  }
+}

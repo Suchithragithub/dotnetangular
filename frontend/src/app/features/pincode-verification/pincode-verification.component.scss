@@ -1,0 +1,72 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+  .card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: none;
+
+      h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .form-control-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+
+    &:focus {
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+
+  .alert {
+    border-radius: 8px;
+    border: none;
+
+    &.alert-info {
+      background-color: #e7f3ff;
+      color: #004085;
+    }
+
+    &.alert-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    &.alert-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    &.alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+  }
+
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .shadow-sm {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+  }
+}

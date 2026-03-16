@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+
+  .profile-photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .profile-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    background-color: #e9ecef;
+  }
+
+  .card {
+    border: none;
+    border-radius: 0.5rem;
+  }
+
+  .form-label {
+    margin-bottom: 0.5rem;
+    color: #495057;
+  }
+
+  .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  .btn {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+  }
+
+  .alert {
+    border-radius: 0.5rem;
+  }
+}

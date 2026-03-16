@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+
+  .card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+  }
+
+  .table {
+    th {
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    tbody tr {
+      transition: background-color 0.15s ease-in-out;
+
+      &:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+      }
+    }
+  }
+
+  @media print {
+    .btn,
+    .alert {
+      display: none !important;
+    }
+
+    .card {
+      box-shadow: none !important;
+      border: 1px solid #dee2e6 !important;
+      page-break-inside: avoid;
+    }
+
+    .card-header {
+      background-color: #0d6efd !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+}

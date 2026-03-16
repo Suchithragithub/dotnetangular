@@ -1,0 +1,38 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+
+  .print-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: white;
+    border: 1px solid #dee2e6;
+  }
+
+  @media print {
+    :host {
+      background-color: white;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+
+    .card {
+      box-shadow: none !important;
+      border: none !important;
+    }
+
+    .container-fluid {
+      padding: 0 !important;
+    }
+
+    .print-container {
+      max-width: 100%;
+    }
+  }
+}

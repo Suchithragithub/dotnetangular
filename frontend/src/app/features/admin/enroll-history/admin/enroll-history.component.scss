@@ -1,0 +1,31 @@
+:host {
+  display: block;
+
+  .avatar-circle {
+    flex-shrink: 0;
+  }
+
+  .table {
+    font-size: 0.9rem;
+
+    th {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .card {
+    border: none;
+  }
+
+  .pagination {
+    .page-link {
+      border-radius: 0.25rem;
+      margin: 0 2px;
+    }
+  }
+}

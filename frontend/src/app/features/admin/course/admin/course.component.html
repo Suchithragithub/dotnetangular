@@ -1,0 +1,222 @@
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Course Management</h2>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+
+  <div class="row" *ngIf="successMessage()">
+    <div class="col-12">
+      <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {{ successMessage() }}
+        <button class="btn-close" (click)="successMessage.set(null)"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+
+  <div class="row" *ngIf="error()">
+    <div class="col-12">
+      <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error() }}
+        <button class="btn-close" (click)="error.set(null)"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+
+<!-- Create Course Form -->
+<div class="col-lg-4 col-md-12 mb-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Create New Course</h5>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="courseForm" (ngSubmit)="onSubmit()">
+
+        <!-- Course Code -->
+        <div class="mb-3">
+          <label class="form-label">
+            Course Code <span class="text-danger">*</span>
+          </label>
+
+          <input
+            type="text"
+            class="form-control"
+            formControlName="coursecode"
+            [class.is-invalid]="isFieldInvalid('coursecode')"
+            placeholder="e.g., CS101"
+          />
+
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('coursecode')">
+            {{ getFieldError('coursecode') }}
+          </div>
+        </div>
+
+        <!-- Course Name -->
+        <div class="mb-3">
+          <label class="form-label">
+            Course Name <span class="text-danger">*</span>
+          </label>
+
+          <input
+            type="text"
+            class="form-control"
+            formControlName="coursename"
+            [class.is-invalid]="isFieldInvalid('coursename')"
+          />
+
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('coursename')">
+            {{ getFieldError('coursename') }}
+          </div>
+        </div>
+
+        <!-- Course Unit -->
+        <div class="mb-3">
+          <label class="form-label">
+            Course Unit <span class="text-danger">*</span>
+          </label>
+
+          <input
+            type="number"
+            class="form-control"
+            formControlName="courseunit"
+            min="1"
+            [class.is-invalid]="isFieldInvalid('courseunit')"
+          />
+
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('courseunit')">
+            {{ getFieldError('courseunit') }}
+          </div>
+        </div>
+
+        <!-- Seat Limit -->
+        <div class="mb-3">
+          <label class="form-label">
+            Seat Limit <span class="text-danger">*</span>
+          </label>
+
+          <input
+            type="number"
+            class="form-control"
+            formControlName="seatlimit"
+            min="1"
+            [class.is-invalid]="isFieldInvalid('seatlimit')"
+          />
+
+          <div class="invalid-feedback" *ngIf="isFieldInvalid('seatlimit')">
+            {{ getFieldError('seatlimit') }}
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="d-grid">
+          <button
+            class="btn btn-primary"
+            type="submit"
+            [disabled]="loading() || courseForm.invalid"
+          >
+            <span *ngIf="!loading()">Create Course</span>
+
+            <span *ngIf="loading()">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Creating...
+            </span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Course List -->
+<div class="col-lg-8 col-md-12">
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white d-flex justify-content-between">
+      <h5 class="mb-0">All Courses</h5>
+      <span class="badge bg-light text-dark">{{ courses().length }} courses</span>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Loading -->
+      <div *ngIf="loading() && courses().length === 0" class="text-center py-5">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-3 text-muted">Loading courses...</p>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!loading() && courses().length === 0" class="text-center py-5">
+        <i class="bi bi-inbox" style="font-size:3rem;color:#ccc"></i>
+        <p class="mt-3 text-muted">No courses available</p>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="courses().length > 0" class="table-responsive">
+        <table class="table table-hover table-striped align-middle">
+
+          <thead class="table-light">
+            <tr>
+              <th>Course Code</th>
+              <th>Course Name</th>
+              <th class="text-center">Units</th>
+              <th class="text-center">Seat Limit</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let course of courses(); trackBy: trackByCourse">
+
+              <td><strong>{{ course.courseCode }}</strong></td>
+
+              <td>{{ course.courseName }}</td>
+
+              <td class="text-center">
+                <span class="badge bg-info">{{ course.courseUnit }}</span>
+              </td>
+
+              <td class="text-center">
+                <span class="badge bg-success">{{ course.noofSeats }}</span>
+              </td>
+
+              <td class="text-center">
+                <button
+                  class="btn btn-danger btn-sm"
+                  (click)="deleteCourse(course.id)"
+                  [disabled]="deletingCourseId() === course.id"
+                >
+                  <span *ngIf="deletingCourseId() !== course.id">
+                    <i class="bi bi-trash"></i> Delete
+                  </span>
+
+                  <span *ngIf="deletingCourseId() === course.id">
+                    <span class="spinner-border spinner-border-sm"></span>
+                  </span>
+                </button>
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<div class="container-fluid py-4">
+  <!-- Loading Spinner -->
+  <div *ngIf="loading()" class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error()" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ error() }}
+    <button type="button" class="btn-close" (click)="error.set(null)"></button>
+  </div>
+
+  <!-- Print Content -->
+  <div *ngIf="!loading() && !error() && printData()" class="print-container">
+    <!-- Action Buttons (Hidden on Print) -->
+    <div class="no-print mb-4 d-flex justify-content-between">
+      <button type="button" class="btn btn-secondary" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>Back
+      </button>
+      <button type="button" class="btn btn-primary" (click)="print()">
+        <i class="bi bi-printer me-2"></i>Print
+      </button>
+    </div>
+
+    <!-- Print Header -->
+    <div class="print-header text-center mb-4">
+      <h1 class="fw-bold">Course Enrollment Report</h1>
+      <p class="text-muted mb-1">Course Enrollment Management System</p>
+      <p class="text-muted">Generated on: {{ currentDate() | date:'fullDate' }} at {{ currentDate() | date:'shortTime' }}</p>
+    </div>
+
+    <!-- Course Information -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Course Information</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-2"><strong>Course Code:</strong> {{ printData()?.course?.courseCode }}</p>
+            <p class="mb-2"><strong>Course Name:</strong> {{ printData()?.course?.courseName }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-2"><strong>Units:</strong> {{ printData()?.course?.courseUnit }}</p>
+            <p class="mb-2"><strong>Seat Limit:</strong> {{ printData()?.course?.noofSeats  }}</p>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <p class="mb-2"><strong>Total Enrollments:</strong> <span class="badge bg-success">{{ getTotalEnrollments() }}</span></p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-2"><strong>Available Seats:</strong> <span class="badge" [class.bg-warning]="getAvailableSeats() > 0" [class.bg-danger]="getAvailableSeats() <= 0">{{ getAvailableSeats() }}</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enrollment List -->
+    <div class="card">
+      <div class="card-header bg-secondary text-white">
+        <h4 class="mb-0">Enrolled Students</h4>
+      </div>
+      <div class="card-body p-0">
+        <div *ngIf="getTotalEnrollments() === 0" class="p-4 text-center text-muted">
+          <p class="mb-0">No students enrolled in this course yet.</p>
+        </div>
+
+        <div *ngIf="getTotalEnrollments() > 0" class="table-responsive">
+          <table class="table table-striped table-bordered mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th scope="col" class="text-center">#</th>
+                <th scope="col">Registration No.</th>
+                <th scope="col">Student Name</th>
+                <th scope="col">CGPA</th>
+                <th scope="col">Session</th>
+                <th scope="col">Department</th>
+                <th scope="col">Level</th>
+                <th scope="col">Semester</th>
+                <th scope="col">Enrollment Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of printData()?.enrollments; let i = index">
+                <td class="text-center">{{ i + 1 }}</td>
+                <td>{{ item.student.studentRegno }}</td>
+                <td>{{ item.student.studentName }}</td>
+                <td class="text-center">{{ item.student.cgpa || 'N/A' }}</td>
+                <td>{{ item.session.sessionName }}</td>
+                <td>{{ item.department.departmentName }}</td>
+                <td>{{ item.level.levelName }}</td>
+                <td>{{ item.semester.semesterName }}</td>
+                <td>{{ item.enrollment.enrollDate | date:'short' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer mt-5 pt-4 border-top">
+      <div class="row">
+        <div class="col-md-6">
+          <p class="mb-1"><strong>Prepared by:</strong> _______________________</p>
+          <p class="text-muted small">Administrator Signature</p>
+        </div>
+        <div class="col-md-6 text-end">
+          <p class="mb-1"><strong>Date:</strong> _______________________</p>
+          <p class="text-muted small">Verification Date</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

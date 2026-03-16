@@ -1,0 +1,172 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <!-- Page Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">My Profile</h2>
+        <button type="button" class="btn btn-outline-secondary" routerLink="/dashboard">
+          <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </button>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="loading()" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading profile...</p>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="error()" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error() }}
+        <button type="button" class="btn-close" (click)="error.set(null)"></button>
+      </div>
+
+      <!-- Success Alert -->
+      <div *ngIf="success()" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        {{ success() }}
+        <button type="button" class="btn-close" (click)="success.set(null)"></button>
+      </div>
+
+      <!-- Profile Form -->
+      <div *ngIf="!loading()" class="card shadow-sm">
+        <div class="card-body p-4">
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <!-- Current Photo Preview -->
+            <div class="mb-4 text-center">
+              <div class="profile-photo-container mb-3">
+                <img 
+                  [src]="photoPreview() || 'assets/images/default-avatar.png'" 
+                  alt="Profile Photo" 
+                  class="profile-photo rounded-circle border border-3 border-light shadow"
+                  onerror="this.src='assets/images/default-avatar.png'"
+                />
+              </div>
+              <p class="text-muted small mb-0" *ngIf="currentStudent()">
+                Registration No: <strong>{{ currentStudent()?.regno }}</strong>
+              </p>
+            </div>
+
+            <!-- Student Name Field -->
+            <div class="mb-3">
+              <label for="studentname" class="form-label fw-semibold">
+                Student Name <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="studentname"
+                class="form-control"
+                formControlName="studentname"
+                placeholder="Enter your full name"
+                [class.is-invalid]="profileForm.get('studentname')?.invalid && profileForm.get('studentname')?.touched"
+              />
+              <div 
+                *ngIf="profileForm.get('studentname')?.invalid && profileForm.get('studentname')?.touched" 
+                class="invalid-feedback"
+              >
+                {{ getFieldError('studentname') }}
+              </div>
+            </div>
+
+            <!-- Photo Upload Field -->
+            <div class="mb-3">
+              <label for="photo" class="form-label fw-semibold">
+                Profile Photo
+              </label>
+              <input
+                type="file"
+                id="photo"
+                class="form-control"
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                [class.is-invalid]="profileForm.get('photo')?.invalid && profileForm.get('photo')?.touched"
+              />
+              <div class="form-text">
+                Upload a new profile photo (JPG, PNG, or GIF). Maximum size: 2MB
+              </div>
+              <div 
+                *ngIf="profileForm.get('photo')?.invalid && profileForm.get('photo')?.touched" 
+                class="invalid-feedback"
+              >
+                {{ getFieldError('photo') }}
+              </div>
+            </div>
+
+            <!-- CGPA Field -->
+            <div class="mb-4">
+              <label for="cgpa" class="form-label fw-semibold">
+                CGPA <span class="text-danger">*</span>
+              </label>
+              <input
+                type="number"
+                id="cgpa"
+                class="form-control"
+                formControlName="cgpa"
+                placeholder="Enter your CGPA (0.00 - 4.00)"
+                step="0.01"
+                min="0"
+                max="4.0"
+                [class.is-invalid]="profileForm.get('cgpa')?.invalid && profileForm.get('cgpa')?.touched"
+              />
+              <div 
+                *ngIf="profileForm.get('cgpa')?.invalid && profileForm.get('cgpa')?.touched" 
+                class="invalid-feedback"
+              >
+                {{ getFieldError('cgpa') }}
+              </div>
+            </div>
+
+            <!-- Additional Profile Information (Read-only) -->
+            <div class="card bg-light mb-4" *ngIf="currentStudent()">
+              <div class="card-body">
+                <h6 class="card-title mb-3">Academic Information</h6>
+                <div class="row">
+                  <div class="col-md-6 mb-2">
+                    <small class="text-muted d-block">Department</small>
+                    <strong>{{ currentStudent()?.deptid || 'N/A' }}</strong>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <small class="text-muted d-block">Level</small>
+                    <strong>{{ currentStudent()?.levelid || 'N/A' }}</strong>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <small class="text-muted d-block">Session</small>
+                    <strong>{{ currentStudent()?.sessionid || 'N/A' }}</strong>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <small class="text-muted d-block">Semester</small>
+                    <strong>{{ currentStudent()?.semesterid || 'N/A' }}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="d-flex gap-2 justify-content-end">
+              <button 
+                type="button" 
+                class="btn btn-secondary"
+                routerLink="/dashboard"
+                [disabled]="loading()"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="profileForm.invalid || loading()"
+              >
+                <span *ngIf="loading()" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!loading()" class="bi bi-save me-2"></i>
+                {{ loading() ? 'Updating...' : 'Update Profile' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

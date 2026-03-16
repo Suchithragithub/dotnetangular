@@ -1,0 +1,128 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Edit Course</h4>
+        </div>
+        <div class="card-body">
+          <!-- Loading Spinner -->
+          <div *ngIf="loading()" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading course details...</p>
+          </div>
+
+          <!-- Error Alert -->
+          <div *ngIf="error()" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ error() }}
+            <button type="button" class="btn-close" (click)="error.set(null)" aria-label="Close"></button>
+          </div>
+
+          <!-- Edit Form -->
+          <form *ngIf="!loading()" [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- Course Code -->
+            <div class="mb-3">
+              <label for="coursecode" class="form-label fw-semibold">Course Code <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="coursecode"
+                class="form-control"
+                formControlName="coursecode"
+                placeholder="Enter course code"
+                [class.is-invalid]="form.get('coursecode')?.invalid && form.get('coursecode')?.touched"
+              />
+              <div *ngIf="form.get('coursecode')?.invalid && form.get('coursecode')?.touched" class="invalid-feedback">
+                <span *ngIf="form.get('coursecode')?.hasError('required')">Course code is required</span>
+              </div>
+            </div>
+
+            <!-- Course Name -->
+            <div class="mb-3">
+              <label for="coursename" class="form-label fw-semibold">Course Name <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                id="coursename"
+                class="form-control"
+                formControlName="coursename"
+                placeholder="Enter course name"
+                [class.is-invalid]="form.get('coursename')?.invalid && form.get('coursename')?.touched"
+              />
+              <div *ngIf="form.get('coursename')?.invalid && form.get('coursename')?.touched" class="invalid-feedback">
+                <span *ngIf="form.get('coursename')?.hasError('required')">Course name is required</span>
+              </div>
+            </div>
+
+            <!-- Course Unit -->
+            <div class="mb-3">
+              <label for="courseunit" class="form-label fw-semibold">Course Unit <span class="text-danger">*</span></label>
+              <input
+                type="number"
+                id="courseunit"
+                class="form-control"
+                formControlName="courseunit"
+                placeholder="Enter course unit"
+                min="1"
+                [class.is-invalid]="form.get('courseunit')?.invalid && form.get('courseunit')?.touched"
+              />
+              <div *ngIf="form.get('courseunit')?.invalid && form.get('courseunit')?.touched" class="invalid-feedback">
+                <span *ngIf="form.get('courseunit')?.hasError('required')">Course unit is required</span>
+                <span *ngIf="form.get('courseunit')?.hasError('min')">Course unit must be at least 1</span>
+              </div>
+            </div>
+
+            <!-- Seat Limit -->
+            <div class="mb-3">
+              <label for="seatlimit" class="form-label fw-semibold">Seat Limit <span class="text-danger">*</span></label>
+              <input
+                type="number"
+                id="seatlimit"
+                class="form-control"
+                formControlName="seatlimit"
+                placeholder="Enter seat limit"
+                min="1"
+                [class.is-invalid]="form.get('seatlimit')?.invalid && form.get('seatlimit')?.touched"
+              />
+              <div *ngIf="form.get('seatlimit')?.invalid && form.get('seatlimit')?.touched" class="invalid-feedback">
+                <span *ngIf="form.get('seatlimit')?.hasError('required')">Seat limit is required</span>
+                <span *ngIf="form.get('seatlimit')?.hasError('min')">Seat limit must be at least 1</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 justify-content-end mt-4">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="onCancel()"
+                [disabled]="loading()"
+              >
+                <i class="bi bi-x-circle me-1"></i>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="form.invalid || loading()"
+              >
+                <span *ngIf="loading()" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <i *ngIf="!loading()" class="bi bi-check-circle me-1"></i>
+                Update Course
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Back Link -->
+      <div class="mt-3 text-center">
+        <a routerLink="/admin/courses" class="text-decoration-none">
+          <i class="bi bi-arrow-left me-1"></i>
+          Back to Courses List
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
