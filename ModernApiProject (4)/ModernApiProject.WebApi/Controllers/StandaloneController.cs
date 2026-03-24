@@ -14,6 +14,12 @@ using System.Threading.Tasks;
 
 namespace ModernApiProject.WebApi.Controllers
 {
+    public class ChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Policy = "StudentOnly")]
@@ -50,28 +56,48 @@ namespace ModernApiProject.WebApi.Controllers
             }
         }
 
-        [HttpPut("change-password")]
-        public async Task<IActionResult> UpdateStudentPassword([FromQuery] string studentRegno, [FromQuery] string newPassword)
+        [HttpPost("change-password")]
+        public async Task<IActionResult> UpdateStudentPassword([FromBody] ChangePasswordRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(studentRegno) || string.IsNullOrWhiteSpace(newPassword))
+                if (request == null ||
+                    string.IsNullOrWhiteSpace(request.CurrentPassword) ||
+                    string.IsNullOrWhiteSpace(request.NewPassword))
                 {
-                    return BadRequest("Student registration number and new password are required.");
+                    return BadRequest(new { message = "Current password and new password are required." });
                 }
-
-                var result = await _standaloneService.UpdateStudentPasswordAsync(studentRegno, newPassword);
+ 
+                if (request.NewPassword.Length < 6)
+                {
+                    return BadRequest(new { message = "New password must be at least 6 characters." });
+                }
+ 
+                var studentRegno =
+                    User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                    User.FindFirst(ClaimTypes.Name)?.Value;
+ 
+                if (string.IsNullOrWhiteSpace(studentRegno))
+                {
+                    return Unauthorized(new { message = "Unable to identify the student from token." });
+                }
+ 
+                var result = await _standaloneService.UpdateStudentPasswordAsync(
+                    studentRegno,
+                    request.CurrentPassword,
+                    request.NewPassword);
+ 
                 if (!result)
                 {
-                    return NotFound("Student not found or password update failed.");
+                    return Unauthorized(new { message = "Current password is incorrect." });
                 }
-
-                return Ok(new { message = "Password updated successfully." });
+ 
+                return Ok(new { success = true, message = "Password updated successfully." });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating password for student {StudentRegno}", studentRegno);
-                return StatusCode(500, "An error occurred while updating the password.");
+                _logger.LogError(ex, "Error updating password for student");
+                return StatusCode(500, new { message = "An error occurred while updating password." });
             }
         }
 
@@ -333,6 +359,7 @@ namespace ModernApiProject.WebApi.Controllers
         }
 
         [HttpPost("login-log")]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateUserLoginLog([FromQuery] string studentRegno, [FromQuery] int status)
         {
             try
@@ -349,7 +376,7 @@ namespace ModernApiProject.WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating login log for student {StudentRegno}", studentRegno);
-                return StatusCode(500, "An error occurred while creating the login log.");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -380,7 +407,7 @@ namespace ModernApiProject.WebApi.Controllers
         }
 
         [HttpPut("my-profile")]
-        public async Task<IActionResult> UpdateStudentProfile([FromQuery] string studentRegno, [FromQuery] string studentName, [FromQuery] string studentPhoto, [FromQuery] decimal cgpa)
+        public async Task<IActionResult> UpdateStudentProfile([FromQuery] string studentRegno, [FromQuery] string studentName, [FromQuery] string? studentPhoto, [FromQuery] decimal cgpa)
         {
             try
             {
@@ -389,7 +416,7 @@ namespace ModernApiProject.WebApi.Controllers
                     return BadRequest("Student registration number and name are required.");
                 }
 
-                var result = await _standaloneService.UpdateStudentProfileAsync(studentRegno, studentName, studentPhoto, cgpa);
+                var result = await _standaloneService.UpdateStudentProfileAsync(studentRegno, studentName, studentPhoto?? "", cgpa);
                 if (!result)
                 {
                     return NotFound("Student not found or profile update failed.");

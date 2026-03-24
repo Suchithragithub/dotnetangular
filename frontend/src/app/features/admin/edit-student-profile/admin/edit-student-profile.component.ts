@@ -10,8 +10,8 @@ import { Student } from '../../../../core/models/student.model';
   selector: 'app-admin-edit-student-profile',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin/edit-student-profile.component.html',
-  styleUrls: ['./admin/edit-student-profile.component.scss']
+  templateUrl: './edit-student-profile.component.html',
+  styleUrls: ['./edit-student-profile.component.scss']
 })
 export class AdminEditStudentProfileComponent implements OnInit {
   private fb = inject(FormBuilder);

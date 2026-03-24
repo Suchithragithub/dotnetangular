@@ -44,13 +44,13 @@
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Registration Number:</strong>
-                <span class="ms-2">{{ enrollmentData()?.student?.regno || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.student?.studentRegno || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Full Name:</strong>
-                <span class="ms-2">{{ enrollmentData()?.student?.name || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.student?.studentName || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
@@ -77,25 +77,25 @@
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Department:</strong>
-                <span class="ms-2">{{ enrollmentData()?.department?.name || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.department?.departmentName || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Level:</strong>
-                <span class="ms-2">{{ enrollmentData()?.level?.name || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.level?.levelName || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Session:</strong>
-                <span class="ms-2">{{ enrollmentData()?.session?.name || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.session?.sessionName || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Semester:</strong>
-                <span class="ms-2">{{ enrollmentData()?.semester?.name || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.semester?.semesterName || 'N/A' }}</span>
               </div>
             </div>
           </div>
@@ -110,25 +110,25 @@
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Course Code:</strong>
-                <span class="ms-2">{{ enrollmentData()?.course?.code || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.course?.courseCode || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Course Name:</strong>
-                <span class="ms-2">{{ enrollmentData()?.course?.name || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.course?.courseName || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Credit Units:</strong>
-                <span class="ms-2">{{ enrollmentData()?.course?.unit || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.course?.courseUnit || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-md-6">
               <div class="d-flex">
                 <strong class="text-muted" style="min-width: 180px;">Seat Limit:</strong>
-                <span class="ms-2">{{ enrollmentData()?.course?.seat || 'N/A' }}</span>
+                <span class="ms-2">{{ enrollmentData()?.course?.noofSeats || 'N/A' }}</span>
               </div>
             </div>
             <div class="col-12" *ngIf="enrollmentData()?.enrollmentDate">
@@ -150,7 +150,7 @@
             </div>
             <div class="col-md-6 text-md-end">
               <p class="text-muted mb-1">
-                <small><strong>Document ID:</strong> {{ enrollmentData()?.student?.regno }}-{{ enrollmentData()?.course?.code }}</small>
+                <small><strong>Document ID:</strong> {{ enrollmentData()?.student?.studentRegno }}-{{ enrollmentData()?.course?.courseCode }}</small>
               </p>
             </div>
           </div>

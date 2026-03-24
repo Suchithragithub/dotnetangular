@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractContro
 import { Router, RouterModule } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
 import { AuthService } from '../../../core/services/auth.service';
-
+ 
 @Component({
   selector: 'app-admin-change-password',
   standalone: true,
@@ -17,19 +17,19 @@ export class AdminChangePasswordComponent implements OnInit {
   private adminService = inject(AdminService);
   private authService = inject(AuthService);
   private router = inject(Router);
-
+ 
   loading = signal(false);
   error = signal<string | null>(null);
   success = signal<string | null>(null);
   showCurrentPassword = signal(false);
   showNewPassword = signal(false);
-
+ 
   changePasswordForm!: FormGroup;
-
+ 
   ngOnInit(): void {
     this.initializeForm();
   }
-
+ 
   private initializeForm(): void {
     this.changePasswordForm = this.fb.group({
       cpass: ['', [Validators.required, Validators.minLength(6)]],
@@ -37,16 +37,16 @@ export class AdminChangePasswordComponent implements OnInit {
       confirmNewPass: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
   }
-
+ 
   private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const newPass = control.get('newpass')?.value;
     const confirmPass = control.get('confirmNewPass')?.value;
-
+ 
     if (newPass && confirmPass && newPass !== confirmPass) {
       control.get('confirmNewPass')?.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-
+ 
     if (control.get('confirmNewPass')?.hasError('passwordMismatch')) {
       const errors = control.get('confirmNewPass')?.errors;
       if (errors) {
@@ -56,39 +56,39 @@ export class AdminChangePasswordComponent implements OnInit {
         }
       }
     }
-
+ 
     return null;
   }
-
+ 
   toggleCurrentPasswordVisibility(): void {
     this.showCurrentPassword.set(!this.showCurrentPassword());
   }
-
+ 
   toggleNewPasswordVisibility(): void {
     this.showNewPassword.set(!this.showNewPassword());
   }
-
+ 
   onSubmit(): void {
     if (this.changePasswordForm.invalid) {
       this.changePasswordForm.markAllAsTouched();
       return;
     }
-
+ 
     this.loading.set(true);
     this.error.set(null);
     this.success.set(null);
-
+ 
     const formData = {
       currentPassword: this.changePasswordForm.value.cpass,
       newPassword: this.changePasswordForm.value.newpass
     };
-
+ 
     this.adminService.changePassword(formData).subscribe({
       next: (response) => {
         this.loading.set(false);
         this.success.set('Password changed successfully! You will be redirected to login.');
         this.changePasswordForm.reset();
-        
+       
         // Logout and redirect to login after 2 seconds
         setTimeout(() => {
           this.authService.logout();
@@ -109,7 +109,7 @@ export class AdminChangePasswordComponent implements OnInit {
       }
     });
   }
-
+ 
   getFieldError(fieldName: string): string {
     const field = this.changePasswordForm.get(fieldName);
     if (field?.hasError('required')) {
@@ -124,7 +124,7 @@ export class AdminChangePasswordComponent implements OnInit {
     }
     return '';
   }
-
+ 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
       cpass: 'Current password',
@@ -133,9 +133,10 @@ export class AdminChangePasswordComponent implements OnInit {
     };
     return labels[fieldName] || fieldName;
   }
-
+ 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.changePasswordForm.get(fieldName);
     return !!(field && field.invalid && field.touched);
   }
 }
+ 

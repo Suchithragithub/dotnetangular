@@ -138,6 +138,12 @@ export class ManageStudentsComponent implements OnInit {
   getStudentPhoto(student: Student): string {
     return student.studentPhoto || 'assets/images/default-avatar.png';
   }
+  onImageError(event: Event, name: string): void {
+    const img = event.target as HTMLImageElement;
+    // Generate a letter avatar using UI Avatars (no file needed)
+    img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6c757d&color=fff&size=40&rounded=true`;
+    img.onerror = null; // prevent infinite loop
+  }
 
   formatCGPA(cgpa: number | undefined): string {
     return cgpa ? cgpa.toFixed(2) : 'N/A';

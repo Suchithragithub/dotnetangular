@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Student } from '../models';
 import { environment } from '../../../environments/environment';
@@ -23,9 +23,10 @@ export interface CheckRegnoResponse {
 }
 
 export interface RegisterStudentRequest {
-  name: string;
-  regno: string;
+  studentName: string;   // was: name
+  studentRegno: string;  // was: regno
   password: string;
+  pincode: string;       // was: missing
 }
 
 export interface RegisterStudentResponse {
@@ -52,39 +53,82 @@ export class StudentService {
   /**
    * Verify current password and update to new password for logged-in student
    */
+  // changePassword(request: ChangePasswordRequest): Observable<{ message: string }> {
+  //   return this.http.put<{ message: string }>(
+  //     `${this.apiUrl}/api/Standalone/change-password`,
+  //     request
+  //   );
+  // }
+
   changePassword(request: ChangePasswordRequest): Observable<{ message: string }> {
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
+ 
     return this.http.post<{ message: string }>(
-      `${this.apiUrl}/api/students/change-password`,
-      request
+      `${this.apiUrl}/api/Standalone/change-password`,
+      request,
+      { headers }
     );
   }
 
   /**
    * Verify student pincode before allowing course enrollment
    */
-  verifyPincode(request: VerifyPincodeRequest): Observable<{ valid: boolean }> {
-    return this.http.post<{ valid: boolean }>(
-      `${this.apiUrl}/api/students/verify-pincode`,
-      request
+  // In student.service.ts
+  verifyPincode(payload: { regno: string; pincode: string }): Observable<any> {
+    return this.http.get(  // ← try GET instead of POST
+      `${this.apiUrl}/api/Standalone/pincode-verification`,
+      { params: { pincode: payload.pincode } }
     );
   }
 
   /**
    * Retrieve student details for enrollment form
    */
-  getStudentByRegno(regno: string): Observable<Student> {
+  // getStudentByRegno(regno: string): Observable<Student> {
+  //   return this.http.get<Student>(
+  //     `${this.apiUrl}/api/Standalone/students/${regno}`
+  //   );
+  // }
+
+  getStudentByRegno(regno: string | number): Observable<Student> {
     return this.http.get<Student>(
-      `${this.apiUrl}/api/students/${regno}`
+      `${this.apiUrl}/api/Standalone/student`,
+      { params: { studentRegno: regno.toString() } }  // ← query param, not path
     );
   }
 
   /**
    * Update student name, photo, and CGPA
    */
-  updateProfile(request: UpdateProfileRequest): Observable<Student> {
-    return this.http.put<Student>(
-      `${this.apiUrl}/api/students/profile`,
-      request
+  // updateProfile(request: UpdateProfileRequest): Observable<Student> {
+  //   return this.http.put<Student>(
+  //     `${this.apiUrl}/api/Standalone/students/profile`,
+  //     request
+  //   );
+  // }
+
+  updateProfile(
+    studentRegno: string,
+    request: UpdateProfileRequest
+  ): Observable<{ message: string }> {
+    const token = localStorage.getItem('token');
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : new HttpHeaders();
+ 
+    const params = new HttpParams()
+      .set('studentRegno', studentRegno)
+      .set('studentName', request.name ?? '')
+      .set('studentPhoto', request.photo ?? '')
+      .set('cgpa', request.cgpa != null ? String(request.cgpa) : '0');
+ 
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/api/Standalone/my-profile`,
+      null,
+      { headers, params }
     );
   }
 
@@ -93,7 +137,7 @@ export class StudentService {
    */
   registerStudent(request: RegisterStudentRequest): Observable<RegisterStudentResponse> {
     return this.http.post<RegisterStudentResponse>(
-      `${this.apiUrl}/api/students`,
+      `${this.apiUrl}/api/Admin/students/register`,
       request
     );
   }
@@ -122,7 +166,7 @@ export class StudentService {
    */
   resetPassword(regno: string): Observable<ResetPasswordResponse> {
     return this.http.put<ResetPasswordResponse>(
-      `${this.apiUrl}/api/students/${regno}/reset-password`,
+      `${this.apiUrl}/api/Standalone/students/${regno}/reset-password`,
       {}
     );
   }
@@ -132,8 +176,13 @@ export class StudentService {
    */
   getAllStudents(): Observable<Student[]> {
     return this.http.get<Student[]>(
-      `${this.apiUrl}/api/students`
+      `${this.apiUrl}/api/Admin/students`
     );
+  }
+
+  updatePassword(studentRegno: string, newPassword: string): Observable<{ message: string }> {
+    let params = new HttpParams().set('studentRegno', studentRegno).set('newPassword', newPassword);
+    return this.http.put<{ message: string }>(`${this.apiUrl}/api/standalone/change-password`, null, { params });
   }
 
   /**
@@ -141,7 +190,7 @@ export class StudentService {
    */
   updateStudentProfileByAdmin(regno: string, request: UpdateProfileRequest): Observable<Student> {
     return this.http.put<Student>(
-      `${this.apiUrl}/api/students/${regno}/profile`,
+      `${this.apiUrl}/api/Standalone/students/${regno}/profile`,
       request
     );
   }

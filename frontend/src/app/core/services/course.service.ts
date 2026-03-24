@@ -13,34 +13,37 @@ export class CourseService {
    * Get all courses for enrollment dropdown
    */
   getCourses(): Observable<Course[]> {
-    return this.http.get<Course[]>(`${this.apiUrl}/api/courses`);
+    return this.http.get<Course[]>(`${this.apiUrl}/api/Admin/courses`);
+  }
+  getCoursesForEnrollment(): Observable<Course[]> {
+    return this.http.get<Course[]>(`${this.apiUrl}/api/Standalone/courses`);
   }
 
   /**
    * Retrieve course details for editing
    */
   getCourseById(id: number | string): Observable<Course> {
-    return this.http.get<Course>(`${this.apiUrl}/api/courses/${id}`);
+    return this.http.get<Course>(`${this.apiUrl}/api/Admin/courses/${id}`);
   }
 
   /**
    * Create new course with code, name, unit, and seat limit
    */
   createCourse(course: Course): Observable<Course> {
-    return this.http.post<Course>(`${this.apiUrl}/api/courses`, course);
+    return this.http.post<Course>(`${this.apiUrl}/api/Admin/courses`, course);
   }
 
   /**
    * Update course details including code, name, unit, and seat limit
    */
   updateCourse(id: number | string, course: Course): Observable<Course> {
-    return this.http.put<Course>(`${this.apiUrl}/api/courses/${id}`, course);
+    return this.http.put<Course>(`${this.apiUrl}/api/Admin/courses/${id}`, course);
   }
 
   /**
    * Delete course by ID
    */
   deleteCourse(id: number | string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/courses/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/api/Admin/courses/${id}`);
   }
 }

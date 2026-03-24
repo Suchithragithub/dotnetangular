@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -9,8 +9,8 @@ import { Session } from '../../../../core/models/session.model';
   selector: 'app-admin-session',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin/session.component.html',
-  styleUrls: ['./admin/session.component.scss']
+  templateUrl: './session.component.html',
+  styleUrls: ['./session.component.scss']
 })
 export class AdminSessionComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -42,7 +42,7 @@ export class AdminSessionComponent implements OnInit {
         this.sessions.set(data);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         this.error.set('Failed to load sessions. Please try again.');
         this.loading.set(false);
         console.error('Error loading sessions:', err);
@@ -60,18 +60,18 @@ export class AdminSessionComponent implements OnInit {
     this.error.set(null);
     this.successMessage.set(null);
 
-    const sessionData: Partial<Session> = {
-      session: this.sessionForm.value.sesssion
+    const sessionData: Session = {
+      sessionName: this.sessionForm.value.sesssion
     };
 
     this.sessionService.createSession(sessionData).subscribe({
-      next: (response: Session) => {
+      next: (_response: Session) => {
         this.successMessage.set('Session created successfully!');
         this.sessionForm.reset();
         this.loadSessions();
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set(err.error?.message || 'Failed to create session. Please try again.');
         this.loading.set(false);
         console.error('Error creating session:', err);
@@ -94,7 +94,7 @@ export class AdminSessionComponent implements OnInit {
         this.loadSessions();
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set(err.error?.message || 'Failed to delete session. Please try again.');
         this.loading.set(false);
         console.error('Error deleting session:', err);
@@ -105,8 +105,4 @@ export class AdminSessionComponent implements OnInit {
   get sesssionControl() {
     return this.sessionForm.get('sesssion');
   }
-}
-
-function inject(arg0: any) {
-  throw new Error('Function not implemented.');
 }

@@ -1,120 +1,69 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" *ngIf="authService.isLoggedIn()">
-  <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/">ModernApiProject</a>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top" *ngIf="authService.isLoggedIn()">
-  <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/">ModernApiProject</a>
-
-
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-
-      <!-- STUDENT MENU -->
-      <ul class="navbar-nav me-auto" *ngIf="!authService.isAdmin()">
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/change-password" routerLinkActive="active">Change Password</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/pincode-verification" routerLinkActive="active">Pincode Verification</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/enroll" routerLinkActive="active">Course Enroll</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/enroll-history" routerLinkActive="active">Enroll History</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/my-profile" routerLinkActive="active">My Profile</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/print" routerLinkActive="active">Print Enrollment</a>
-        </li>
-
-      </ul>
-
-      <!-- ADMIN MENU -->
-      <ul class="navbar-nav me-auto" *ngIf="authService.isAdmin()">
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/change-password" routerLinkActive="active">Change Password</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/session" routerLinkActive="active">Sessions</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/semester" routerLinkActive="active">Semesters</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/department" routerLinkActive="active">Departments</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/level" routerLinkActive="active">Levels</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/course" routerLinkActive="active">Courses</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/student-registration" routerLinkActive="active">Register Student</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/manage-students" routerLinkActive="active">Manage Students</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/enroll-history" routerLinkActive="active">Enroll History</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/user-log" routerLinkActive="active">User Log</a>
-        </li>
-
-      </ul>
-
-      <!-- LOGOUT BUTTON -->
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <button class="btn btn-outline-light" (click)="logout()">Logout</button>
-        </li>
-      </ul>
-
+<header class="portal-header" *ngIf="authService.isLoggedIn()">
+  <!-- TOP SECTION: Dark Navy Blue -->
+  <div class="header-top">
+    <div class="container-fluid px-4">
+      <a class="brand-title" routerLink="/">
+        Online Course <br />
+        Registration Student <br />
+        Portal
+      </a>
     </div>
-
   </div>
-</nav>
+
+  <!-- BOTTOM SECTION: Navigation Links (Lighter Blue) -->
+  <nav class="navbar navbar-expand-lg header-nav">
+    <div class="container-fluid px-4">
+      
+      <!-- Mobile Toggler -->
+      <button
+        class="navbar-toggler ms-auto"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+
+        <!-- STUDENT MENU -->
+        <!-- 'ms-auto' pushes these to the right -->
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" *ngIf="!authService.isAdmin()">
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/change-password" routerLinkActive="active">Change Password</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/pincode-verification" routerLinkActive="active">Pincode Verification</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/enroll" routerLinkActive="active">Course Enroll</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/enroll-history" routerLinkActive="active">Enroll History</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/my-profile" routerLinkActive="active">My Profile</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/print" routerLinkActive="active">Print Enrollment</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link cursor-pointer" (click)="logout()">Logout</a></li>
+        </ul>
+
+        <!-- ADMIN MENU -->
+        <!-- 'ms-auto' pushes these to the right -->
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center" *ngIf="authService.isAdmin()">
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/change-password" routerLinkActive="active">Change Password</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/session" routerLinkActive="active">Sessions</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/semester" routerLinkActive="active">Semesters</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/department" routerLinkActive="active">Departments</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/level" routerLinkActive="active">Levels</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/course" routerLinkActive="active">Courses</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/student-registration" routerLinkActive="active">Register Student</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/manage-students" routerLinkActive="active">Manage Students</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/enroll-history" routerLinkActive="active">Enroll History</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link" routerLink="/admin/user-log" routerLinkActive="active">User Log</a></li>
+          <li class="nav-item"><a class="nav-link custom-nav-link cursor-pointer" (click)="logout()">Logout</a></li>
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+</header>
 
 <!-- MAIN CONTENT -->
-
-<div class="main-content" style="margin-top:70px;">
-  <router-outlet></router-outlet>
-</div>
-
-  </div>
-</nav>
-
+<!-- Note: Removed the inline style="margin-top:70px" as the new header is not fixed-top -->
 <div class="main-content">
   <router-outlet></router-outlet>
 </div>

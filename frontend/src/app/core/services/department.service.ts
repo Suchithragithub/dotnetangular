@@ -14,7 +14,10 @@ export class DepartmentService {
    * @returns Observable of Department array
    */
   getDepartments(): Observable<Department[]> {
-    return this.http.get<Department[]>(`${this.apiUrl}/api/departments`);
+    return this.http.get<Department[]>(`${this.apiUrl}/api/Admin/departments`);
+  }
+  getDepartmentsForEnrollment(): Observable<Department[]> {
+    return this.http.get<Department[]>(`${this.apiUrl}/api/Standalone/departments`);
   }
 
   /**
@@ -23,7 +26,7 @@ export class DepartmentService {
    * @returns Observable of created Department
    */
   createDepartment(department: Department): Observable<Department> {
-    return this.http.post<Department>(`${this.apiUrl}/api/departments`, department);
+    return this.http.post<Department>(`${this.apiUrl}/api/Admin/departments`, department);
   }
 
   /**
@@ -32,6 +35,6 @@ export class DepartmentService {
    * @returns Observable of void
    */
   deleteDepartment(id: number | string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/departments/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/api/Admin/departments/${id}`);
   }
 }

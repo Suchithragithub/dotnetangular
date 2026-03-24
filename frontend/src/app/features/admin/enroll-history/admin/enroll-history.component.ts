@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { inject } from '@angular/core';
 import { EnrollmentDetails, EnrollmentService } from '../../../../core/services/enrollment.service';
-import { CourseEnroll } from '../../../../core/models/course-enroll.model';
 
 @Component({
   selector: 'app-admin-enroll-history',
@@ -47,6 +46,10 @@ export class AdminEnrollHistoryComponent implements OnInit {
 
     this.enrollmentService.getAllEnrollments().subscribe({
       next: (data: EnrollmentDetails[]) => {
+
+        
+        console.log("🔥 FULL API RESPONSE:", data);
+
         this.enrollments.set(data);
         this.filteredEnrollments.set(data);
         this.extractUniqueFilters(data);
@@ -68,15 +71,15 @@ export class AdminEnrollHistoryComponent implements OnInit {
     const semesters = new Set<string>();
 
     enrollments.forEach(enrollment => {
-      if (enrollment.session?.sessionName) sessions.add(enrollment.session.sessionName);
-      if (enrollment.department?.departmentName) departments.add(enrollment.department.departmentName);
-      if (enrollment.level?.levelName) levels.add(enrollment.level.levelName);
-      if (enrollment.semester?.semesterName) semesters.add(enrollment.semester.semesterName);
+      if (enrollment.sessionName) sessions.add(enrollment.sessionName);
+      if (enrollment.departmentName) departments.add(enrollment.departmentName);
+      // if (enrollment.levelName) levels.add(enrollment.levelName);
+      if (enrollment.semesterName) semesters.add(enrollment.semesterName);
     });
 
     this.uniqueSessions.set(Array.from(sessions).sort());
     this.uniqueDepartments.set(Array.from(departments).sort());
-    this.uniqueLevels.set(Array.from(levels).sort());
+    // this.uniqueLevels.set(Array.from(levels).sort());
     this.uniqueSemesters.set(Array.from(semesters).sort());
   }
 
@@ -116,27 +119,27 @@ export class AdminEnrollHistoryComponent implements OnInit {
     const search = this.searchTerm().toLowerCase();
     if (search) {
       filtered = filtered.filter(enrollment =>
-        enrollment.student?.studentRegno?.toLowerCase().includes(search) ||
-        enrollment.student?.studentName?.toLowerCase().includes(search) ||
-        enrollment.course?.courseCode?.toLowerCase().includes(search) ||
-        enrollment.course?.courseName?.toLowerCase().includes(search)
+        enrollment.studentRegno?.toLowerCase().includes(search) ||
+        enrollment.studentName?.toLowerCase().includes(search) ||
+        // enrollment.courseCode?.toLowerCase().includes(search) ||
+        enrollment.courseName?.toLowerCase().includes(search)
       );
     }
 
     if (this.filterSession()) {
-      filtered = filtered.filter(enrollment => enrollment.session?.sessionName === this.filterSession());
+      filtered = filtered.filter(enrollment => enrollment.sessionName === this.filterSession());
     }
 
     if (this.filterDepartment()) {
-      filtered = filtered.filter(enrollment => enrollment.department?.departmentName === this.filterDepartment());
+      filtered = filtered.filter(enrollment => enrollment.departmentName === this.filterDepartment());
     }
 
-    if (this.filterLevel()) {
-      filtered = filtered.filter(enrollment => enrollment.level?.levelName === this.filterLevel());
-    }
+    // if (this.filterLevel()) {
+    //   filtered = filtered.filter(enrollment => enrollment.levelName === this.filterLevel());
+    // }
 
     if (this.filterSemester()) {
-      filtered = filtered.filter(enrollment => enrollment.semester?.semesterName === this.filterSemester());
+      filtered = filtered.filter(enrollment => enrollment.semesterName === this.filterSemester());
     }
 
     this.filteredEnrollments.set(filtered);
@@ -191,6 +194,10 @@ export class AdminEnrollHistoryComponent implements OnInit {
     return pages;
   }
 
+  visibleRangeEnd(): number {
+    return Math.min(this.currentPage() * this.itemsPerPage, this.filteredEnrollments().length);
+  }
+
   clearFilters(): void {
     this.searchTerm.set('');
     this.filterSession.set('');
@@ -211,15 +218,15 @@ export class AdminEnrollHistoryComponent implements OnInit {
 
     const headers = ['Reg No', 'Student Name', 'Course Code', 'Course Name', 'Units', 'Session', 'Department', 'Level', 'Semester', 'Enrolled Date'];
     const rows = enrollments.map(e => [
-      e.student?.studentRegno || '',
-      e.student?.studentName || '',
-      e.course?.courseCode || '',
-      e.course?.courseName || '',
-      e.course?.courseUnit?.toString() || '',
-      e.session?.sessionName || '',
-      e.department?.departmentName || '',
-      e.level?.levelName || '',
-      e.semester?.semesterName || '',
+      e.studentRegno || '',
+      e.studentName || '',
+      e.courseId?.toString() || '',
+      e.courseName || '',
+      '', // units not available
+      e.sessionName || '',
+      e.departmentName || '',
+      '', // level not available
+      e.semesterName || '',
       e.enrollDate ? new Date(e.enrollDate).toLocaleDateString() : ''
     ]);
 

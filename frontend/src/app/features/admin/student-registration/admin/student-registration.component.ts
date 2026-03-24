@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -6,27 +6,14 @@ import { StudentService } from '../../../../core/services/student.service';
 import { SessionService } from '../../../../core/services/session.service';
 import { DepartmentService } from '../../../../core/services/department.service';
 import { LevelService } from '../../../../core/services/level.service';
-import { inject } from '@angular/core';
 import { Session } from '../../../../core/models/session.model';
 import { Department } from '../../../../core/models/department.model';
 import { Level } from '../../../../core/models/level.model';
-
-interface StudentRegistrationRequest {
-  studentname: string;
-  studentregno: string;
-  password: string;
-  sessionId?: number;
-  departmentId?: number;
-  levelId?: number;
-}
-
-interface StudentRegistrationResponse {
-  id: number;
-  studentname: string;
-  studentregno: string;
-  pincode: string;
-  message?: string;
-}
+import {
+  CheckRegnoResponse,
+  RegisterStudentRequest,
+  RegisterStudentResponse
+} from '../../../../core/services/student.service';
 
 @Component({
   selector: 'app-student-registration',
@@ -111,16 +98,21 @@ export class StudentRegistrationComponent implements OnInit {
 
   private checkRegnoExists(regno: string): void {
     this.checkingRegno.set(true);
-    this.studentService.checkRegnoExists(regno).subscribe({
-      next: (response: { exists: boolean }) => {
+    this.studentService.checkRegno({ regno }).subscribe({
+      next: (response: CheckRegnoResponse) => {
         this.regnoExists.set(response.exists);
         this.checkingRegno.set(false);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Error checking regno:', err);
         this.checkingRegno.set(false);
       }
     });
+  }
+
+  // Generates a random 6-digit pincode
+  private generatePincode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   onSubmit(): void {
@@ -141,33 +133,38 @@ export class StudentRegistrationComponent implements OnInit {
     this.generatedPincode.set(null);
 
     const formValue = this.registrationForm.value;
-    const registrationData: StudentRegistrationRequest = {
-      studentname: formValue.studentname,
-      studentregno: formValue.studentregno,
-      password: formValue.password
+    const registrationData: RegisterStudentRequest = {
+      studentName: formValue.studentname,
+      studentRegno: formValue.studentregno,
+      password: formValue.password,
+      pincode: this.generatePincode()
     };
 
-    if (formValue.sessionId) {
-      registrationData.sessionId = parseInt(formValue.sessionId, 10);
-    }
-    if (formValue.departmentId) {
-      registrationData.departmentId = parseInt(formValue.departmentId, 10);
-    }
-    if (formValue.levelId) {
-      registrationData.levelId = parseInt(formValue.levelId, 10);
-    }
-
     this.studentService.registerStudent(registrationData).subscribe({
-      next: (response: StudentRegistrationResponse) => {
+      next: (response: RegisterStudentResponse) => {
+        console.log('✅ REGISTRATION RESPONSE:', response);
         this.loading.set(false);
         this.generatedPincode.set(response.pincode);
-        this.success.set(`Student registered successfully! Registration Number: ${response.studentregno}`);
+        this.success.set(
+          `Student registered successfully! Registration Number: ${response.student?.studentRegno || response.student?.regno || 'N/A'}`
+        );
         this.registrationForm.reset();
         this.regnoExists.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.loading.set(false);
-        this.error.set(err.error?.message || 'Failed to register student. Please try again.');
+        console.log('❌ ERROR STATUS:', err.status);
+        console.log('❌ ERROR BODY:', err.error);
+        console.log('❌ FULL ERROR:', JSON.stringify(err.error));
+
+        // Show specific validation errors from backend if available
+        const backendErrors = err.error?.errors;
+        if (backendErrors) {
+          const messages = Object.values(backendErrors).flat().join(' ');
+          this.error.set(messages);
+        } else {
+          this.error.set(err.error?.message || err.error?.title || 'Failed to register student. Please try again.');
+        }
       }
     });
   }

@@ -78,49 +78,36 @@
               <th scope="col">Student Name</th>
               <th scope="col">Course Code</th>
               <th scope="col">Course Name</th>
-              <th scope="col">Units</th>
               <th scope="col">Session</th>
               <th scope="col">Department</th>
-              <th scope="col">Level</th>
               <th scope="col">Semester</th>
               <th scope="col">Enrolled Date</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngIf="filteredEnrollments().length === 0">
-              <td colspan="11" class="text-center py-5 text-muted">
+              <td colspan="9" class="text-center py-5 text-muted">
                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                 No enrollment records found
               </td>
             </tr>
             <tr *ngFor="let enrollment of getPaginatedEnrollments(); let i = index">
               <td>{{ (currentPage() - 1) * itemsPerPage + i + 1 }}</td>
+              
               <td>
-                <span class="badge bg-primary">{{ enrollment.student?.regNo || 'N/A' }}</span>
+                <span class="badge bg-primary">{{ enrollment.studentRegno || 'N/A' }}</span>
               </td>
               <td>
-                <div class="d-flex align-items-center">
-                  <div class="avatar-circle me-2" *ngIf="enrollment.student?.photo">
-                    <img [src]="enrollment.student.photo" [alt]="enrollment.student.firstName" class="rounded-circle" width="32" height="32" />
-                  </div>
-                  <div class="avatar-circle me-2 bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" *ngIf="!enrollment.student?.photo" style="width: 32px; height: 32px; font-size: 14px;">
-                    {{ (enrollment.student?.firstName?.charAt(0) || '') + (enrollment.student?.lastName?.charAt(0) || '') }}
-                  </div>
-                  <span>{{ enrollment.student?.firstName || '' }} {{ enrollment.student?.lastName || '' }}</span>
-                </div>
+                <span>{{ enrollment.studentName || '' }}</span>
               </td>
-              <td><strong>{{ enrollment.course?.courseCode || 'N/A' }}</strong></td>
-              <td>{{ enrollment.course?.courseName || 'N/A' }}</td>
-              <td>
-                <span class="badge bg-info">{{ enrollment.course?.units || 0 }}</span>
-              </td>
-              <td>{{ enrollment.session?.name || 'N/A' }}</td>
-              <td>{{ enrollment.department?.name || 'N/A' }}</td>
-              <td>{{ enrollment.level?.name || 'N/A' }}</td>
-              <td>{{ enrollment.semester?.name || 'N/A' }}</td>
+              <td><strong>{{ enrollment.courseId || 'N/A' }}</strong></td>
+              <td>{{ enrollment.courseName || 'N/A' }}</td>
+              <td>{{ enrollment.sessionName || 'N/A' }}</td>
+              <td>{{ enrollment.departmentName || 'N/A' }}</td>
+              <td>{{ enrollment.semesterName || 'N/A' }}</td>
               <td>
                 <small class="text-muted">
-                  {{ enrollment.createdAt ? (enrollment.createdAt | date: 'short') : 'N/A' }}
+                  {{ enrollment.enrollDate ? (enrollment.enrollDate | date: 'short') : 'N/A' }}
                 </small>
               </td>
             </tr>
@@ -134,7 +121,7 @@
         <div class="col-md-6">
           <p class="mb-0 text-muted">
             Showing {{ (currentPage() - 1) * itemsPerPage + 1 }} to 
-            {{ Math.min(currentPage() * itemsPerPage, filteredEnrollments().length) }} of 
+            {{ visibleRangeEnd() }} of 
             {{ filteredEnrollments().length }} enrollments
           </p>
         </div>

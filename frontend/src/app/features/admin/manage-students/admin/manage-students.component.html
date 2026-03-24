@@ -88,13 +88,14 @@
                           width="40"
                           height="40"
                           style="object-fit: cover;"
+                          (error)="onImageError($event, student.studentName || 'Student')"
                         />
                       </td>
                       <td class="fw-bold">{{ student.studentRegno }}</td>
                       <td>{{ student.studentName }}</td>
-                      <td>{{ student.department? || 'N/A' }}</td>
-                      <td>{{ student.level?.name || 'N/A' }}</td>
-                      <td>{{ student.session?.name || 'N/A' }}</td>
+                      <td>{{ student.department || 'N/A' }}</td>
+                      <td>{{ student.level || 'N/A' }}</td>
+                      <td>{{ student.session || 'N/A' }}</td>
                       <td>{{ formatCGPA(student.cgpa) }}</td>
                       <td class="text-center">
                         <div class="btn-group" role="group">
@@ -190,7 +191,7 @@
               Are you sure you want to reset the password for student <strong>{{ selectedStudent()?.studentName }}</strong> ({{ selectedStudent()?.studentRegno }})?
             </p>
             <p class="text-muted mt-2 mb-0">
-              <small><i class="bi bi-info-circle"></i> The password will be reset to: <strong>Test@123</strong></small>
+              <small><i class="bi bi-info-circle"></i> The password will be reset to: <strong>Test&#64;123</strong></small>
             </p>
           }
         </div>

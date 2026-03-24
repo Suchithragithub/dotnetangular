@@ -2,17 +2,11 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { StudentService } from '../../services/student.service';
-import { AuthService } from '../../services/auth.service';
+import { StudentService } from '../../core/services/student.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface PincodeVerificationForm {
   pincode: FormControl<string | null>;
-}
-
-interface VerifyPincodeResponse {
-  success: boolean;
-  message: string;
-  verified?: boolean;
 }
 
 @Component({
@@ -47,7 +41,7 @@ export class PincodeVerificationComponent implements OnInit {
 
   ngOnInit(): void {
     // Check if user is authenticated
-    const currentUser = this.authService.currentUser;
+    const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
       this.router.navigate(['/login']);
       return;
@@ -78,33 +72,34 @@ export class PincodeVerificationComponent implements OnInit {
     }
 
     const payload = {
+      regno: this.authService.getCurrentUser()?.regno || '',
       pincode: pincodeValue
     };
 
     this.studentService.verifyPincode(payload).subscribe({
-      next: (response: VerifyPincodeResponse) => {
+      next: (response: any) => {
         this.loading.set(false);
-        if (response.success && response.verified) {
-          this.success.set('Pincode verified successfully! Redirecting to enrollment...');
-          // Store verification status in session/local storage if needed
+
+        // Backend returns student object if found, not { valid: boolean }
+        if (response && response.studentRegno) {
+          this.success.set('Pincode verified successfully! Redirecting...');
           sessionStorage.setItem('pincodeVerified', 'true');
           sessionStorage.setItem('pincodeVerifiedAt', new Date().toISOString());
-          
-          // Redirect after short delay to show success message
           setTimeout(() => {
             this.router.navigate([this.returnUrl]);
           }, 1500);
         } else {
-          this.error.set(response.message || 'Invalid pincode. Please try again.');
+          this.error.set('Invalid pincode. Please try again.');
           this.form.reset();
         }
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(
-          err.error?.message || 
-          'Failed to verify pincode. Please check your pincode and try again.'
-        );
+        if (err.status === 404) {
+          this.error.set('Invalid pincode. No student found.');
+        } else {
+          this.error.set(err.error?.message || 'Failed to verify pincode. Please try again.');
+        }
         this.form.reset();
       }
     });

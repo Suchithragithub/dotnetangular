@@ -9,8 +9,8 @@ import { Semester } from '../../../../core/models/semester.model';
   selector: 'app-admin-semester',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin/semester.component.html',
-  styleUrls: ['./admin/semester.component.scss']
+  templateUrl: './semester.component.html',
+  styleUrls: ['./semester.component.scss']
 })
 export class AdminSemesterComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -61,8 +61,7 @@ export class AdminSemesterComponent implements OnInit {
     this.successMessage.set(null);
 
     const semesterData: Semester = {
-      id:0,
-      semesterName: this.semesterForm.value.semester
+      semesterName: this.semesterForm.value.semester ?? ''
     };
 
     this.semesterService.createSemester(semesterData).subscribe({

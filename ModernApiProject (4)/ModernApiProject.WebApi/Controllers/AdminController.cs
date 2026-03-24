@@ -12,6 +12,18 @@ using System.Text;
 
 namespace ModernApiProject.WebApi.Controllers
 {
+    // Place this OUTSIDE the AdminController class, inside the namespace block
+    public class ChangeAdminPasswordRequest
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
+    public class AdminChangePasswordRequest
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
+    
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Policy = "AdminOnly")] 
@@ -48,27 +60,53 @@ namespace ModernApiProject.WebApi.Controllers
             }
         }
 
-        [HttpPut("change-password")]
-        public async Task<IActionResult> UpdateAdminPassword([FromBody] AdminModel model)
+        // Replace [HttpPut("change-password")] with [HttpPost("change-password")]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> UpdateAdminPassword([FromBody] ChangeAdminPasswordRequest request)
         {
             try
             {
-                if (string.IsNullOrEmpty(model.Password) || string.IsNullOrEmpty(model.Username))
+                if (request == null
+                    || string.IsNullOrWhiteSpace(request.CurrentPassword)
+                    || string.IsNullOrWhiteSpace(request.NewPassword))
                 {
-                    return BadRequest("Old password and new password are required");
+                    return BadRequest(new { message = "Current password and new password are required." });
                 }
-
-                var result = await _adminService.UpdateAdminPasswordAsync(model.Username, model.Password);
+ 
+                if (request.NewPassword.Length < 6)
+                {
+                    return BadRequest(new { message = "New password must be at least 6 characters." });
+                }
+ 
+                // Step 1: Validate the current password
+                var isValid = await _adminService.ValidateAdminPasswordAsync(request.CurrentPassword);
+                if (!isValid)
+                {
+                    return Unauthorized(new { message = "Current password is incorrect." });
+                }
+ 
+                // Step 2: Get admin username from JWT claims
+                var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+ 
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    return Unauthorized(new { message = "Unable to identify the admin user from token." });
+                }
+ 
+                // Step 3: Perform the password update
+                var result = await _adminService.UpdateAdminPasswordAsync(username, request.NewPassword);
                 if (result)
                 {
-                    return Ok(new { message = "Password updated successfully" });
+                    return Ok(new { success = true, message = "Password updated successfully." });
                 }
-                return BadRequest("Failed to update password");
+ 
+                return BadRequest(new { message = "Failed to update password. Please try again." });
             }
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Error updating admin password");
-                return StatusCode(500, "An error occurred while updating password");
+                return StatusCode(500, new { message = "An error occurred while updating password." });
             }
         }
 
@@ -524,7 +562,8 @@ namespace ModernApiProject.WebApi.Controllers
                 var errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 return StatusCode(500, $"An error occurred: {errorMessage}");
             }
-        }[HttpDelete("semesters/{id}")]
+        }
+        [HttpDelete("semesters/{id}")]
         public async Task<IActionResult> DeleteSemester(int id)
         {
             try

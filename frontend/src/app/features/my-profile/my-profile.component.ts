@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { StudentService } from '../../core/services/student.service';
 import { Student } from '../../core/models/student.model';
-
+ 
 @Component({
   selector: 'app-my-profile',
   standalone: true,
@@ -18,7 +18,7 @@ export class MyProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private studentService = inject(StudentService);
   private router = inject(Router);
-
+ 
   profileForm!: FormGroup;
   loading = signal(false);
   error = signal<string | null>(null);
@@ -26,12 +26,22 @@ export class MyProfileComponent implements OnInit {
   currentStudent = signal<Student | null>(null);
   selectedFile = signal<File | null>(null);
   photoPreview = signal<string | null>(null);
-
+ 
+  readonly defaultAvatar =
+    'data:image/svg+xml;utf8,' +
+    encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#e9ecef"/>
+        <circle cx="100" cy="75" r="35" fill="#adb5bd"/>
+        <path d="M40 180c10-35 35-55 60-55s50 20 60 55" fill="#adb5bd"/>
+      </svg>
+    `);
+ 
   ngOnInit(): void {
     this.initializeForm();
     this.loadStudentProfile();
   }
-
+ 
   private initializeForm(): void {
     this.profileForm = this.fb.group({
       studentname: ['', [Validators.required, Validators.minLength(2)]],
@@ -39,58 +49,78 @@ export class MyProfileComponent implements OnInit {
       cgpa: ['', [Validators.required, Validators.min(0), Validators.max(4.0)]]
     });
   }
-
+ 
   private loadStudentProfile(): void {
     this.loading.set(true);
     this.error.set(null);
-
+ 
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser || !currentUser.regno) {
+    console.log("DEBUG user:", currentUser);
+ 
+    const regno = currentUser?.studentRegno; // FIXED
+ 
+    if (!currentUser || !regno) {
       this.error.set('User not authenticated. Please login again.');
       this.loading.set(false);
       this.router.navigate(['/login']);
       return;
     }
-
-    const regno = currentUser.regno;
-
+ 
     this.studentService.getStudentByRegno(regno).subscribe({
-      next: (student: Student) => {
-        this.currentStudent.set(student);
+      next: (student: any) => {
+        console.log("DEBUG student API:", student);
+ 
+        this.currentStudent.set({
+          studentRegno: student.studentRegno ?? student.StudentRegno,
+          studentName: student.studentName ?? student.StudentName,
+          cgpa: student.cgpa ?? student.Cgpa,
+          studentPhoto: student.studentPhoto ?? student.StudentPhoto,
+          department: student.department ?? student.Department,
+          session: student.session ?? student.Session,
+          semester: student.semester ?? student.Semester
+        } as any);
+ 
         this.profileForm.patchValue({
-          studentname: student.studentname || '',
-          cgpa: student.cgpa || ''
+          studentname: student.studentName ?? student.StudentName ?? '',
+          cgpa: student.cgpa ?? student.Cgpa ?? ''
         });
-        if (student.photo) {
-          this.photoPreview.set(student.photo);
-        }
+ 
+        this.photoPreview.set(student.studentPhoto ?? student.StudentPhoto ?? null);
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading student profile:', err);
+        console.error("DEBUG error:", err);
         this.error.set('Failed to load profile data. Please try again.');
         this.loading.set(false);
       }
     });
   }
-
+ 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      this.selectedFile.set(file);
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        if (e.target?.result) {
-          this.photoPreview.set(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+ 
+    const file = input.files[0];
+    this.selectedFile.set(file);
+ 
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (e.target?.result) {
+        this.photoPreview.set(e.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+ 
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img.src !== this.defaultAvatar) {
+      img.src = this.defaultAvatar;
     }
   }
-
+ 
   onSubmit(): void {
     if (this.profileForm.invalid) {
       Object.keys(this.profileForm.controls).forEach(key => {
@@ -98,47 +128,41 @@ export class MyProfileComponent implements OnInit {
       });
       return;
     }
-
+ 
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser?.studentRegno) {
+      this.error.set('User not authenticated.');
+      return;
+    }
+ 
     this.loading.set(true);
     this.error.set(null);
     this.success.set(null);
-
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser || !currentUser.regno) {
-      this.error.set('User not authenticated.');
-      this.loading.set(false);
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('regno', currentUser.regno);
-    formData.append('studentname', this.profileForm.get('studentname')?.value);
-    formData.append('cgpa', this.profileForm.get('cgpa')?.value);
-
-    if (this.selectedFile()) {
-      formData.append('photo', this.selectedFile()!);
-    }
-
-    this.studentService.updateProfile(formData).subscribe({
-      next: (response) => {
+ 
+    const request = {
+      name: this.profileForm.get('studentname')?.value,
+      cgpa: Number(this.profileForm.get('cgpa')?.value),
+      photo: this.photoPreview() ?? this.currentStudent()?.studentPhoto ?? ''
+    };
+ 
+    this.studentService.updateProfile(currentUser.studentRegno, request).subscribe({
+      next: () => {
         this.success.set('Profile updated successfully!');
         this.loading.set(false);
         this.selectedFile.set(null);
-        
-        // Reload profile to get updated data
+ 
         setTimeout(() => {
           this.loadStudentProfile();
           this.success.set(null);
-        }, 2000);
+        }, 1500);
       },
       error: (err) => {
-        console.error('Error updating profile:', err);
-        this.error.set(err.error?.message || 'Failed to update profile. Please try again.');
+        this.error.set(err?.error?.message || 'Failed to update profile. Please try again.');
         this.loading.set(false);
       }
     });
   }
-
+ 
   getFieldError(fieldName: string): string {
     const control = this.profileForm.get(fieldName);
     if (control?.hasError('required')) {
@@ -155,9 +179,9 @@ export class MyProfileComponent implements OnInit {
     }
     return '';
   }
-
+ 
   private getFieldLabel(fieldName: string): string {
-    const labels: { [key: string]: string } = {
+    const labels: Record<string, string> = {
       studentname: 'Student Name',
       cgpa: 'CGPA',
       photo: 'Photo'
@@ -165,3 +189,4 @@ export class MyProfileComponent implements OnInit {
     return labels[fieldName] || fieldName;
   }
 }
+ 

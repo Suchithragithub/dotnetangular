@@ -9,8 +9,8 @@ import { Level } from '../../../../core/models/level.model';
   selector: 'app-admin-level',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin/level.component.html',
-  styleUrls: ['./admin/level.component.scss']
+  templateUrl: './level.component.html',
+  styleUrls: ['./level.component.scss']
 })
 export class AdminLevelComponent implements OnInit {
   private fb = inject(FormBuilder);

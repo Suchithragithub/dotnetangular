@@ -120,7 +120,7 @@
                     <button
                       type="button"
                       class="btn btn-sm btn-danger"
-                      (click)="deleteDepartment(dept.id)"
+                      (click)="deleteDepartment(dept.id!)"
                       [disabled]="deletingId() === dept.id"
                       title="Delete department"
                     >

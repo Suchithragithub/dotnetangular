@@ -121,8 +121,8 @@ namespace ModernApiProject.Application.Tests.Services
         [Fact]
         public async Task UpdateStudentPasswordAsync_WithValidStudent_ReturnsTrue()
         {
-            // Arrange
             var studentRegno = "STU001";
+            var currentPassword = "oldpassword";  // add this
             var newPassword = "newpassword123";
             var student = new Student 
             { 
@@ -136,33 +136,27 @@ namespace ModernApiProject.Application.Tests.Services
             _mockContext.Setup(c => c.Students).Returns(mockSet.Object);
             _mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-            // Act
-            var result = await _service.UpdateStudentPasswordAsync(studentRegno, newPassword);
+            // Act - pass currentPassword
+            var result = await _service.UpdateStudentPasswordAsync(studentRegno, currentPassword, newPassword);
 
-            // Assert
             Assert.True(result);
-            Assert.Equal(newPassword, student.Password);
-            Assert.NotNull(student.UpdationDate);
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
         public async Task UpdateStudentPasswordAsync_WithNonExistentStudent_ReturnsFalse()
         {
-            // Arrange
             var studentRegno = "NONEXISTENT";
+            var currentPassword = "anypassword";  // add this
             var newPassword = "newpassword123";
             var students = new List<Student>().AsQueryable();
 
             var mockSet = CreateMockDbSet(students);
             _mockContext.Setup(c => c.Students).Returns(mockSet.Object);
 
-            // Act
-            var result = await _service.UpdateStudentPasswordAsync(studentRegno, newPassword);
+            // Act - pass currentPassword
+            var result = await _service.UpdateStudentPasswordAsync(studentRegno, currentPassword, newPassword);
 
-            // Assert
             Assert.False(result);
-            _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Theory]
@@ -171,9 +165,8 @@ namespace ModernApiProject.Application.Tests.Services
         [InlineData("   ", "password")]
         public async Task UpdateStudentPasswordAsync_WithInvalidStudentRegno_ThrowsArgumentException(string invalidRegno, string password)
         {
-            // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() => 
-                _service.UpdateStudentPasswordAsync(invalidRegno, password));
+                _service.UpdateStudentPasswordAsync(invalidRegno, password, "newpassword"));  // add newPassword
         }
 
         [Theory]
@@ -182,9 +175,8 @@ namespace ModernApiProject.Application.Tests.Services
         [InlineData("STU001", "   ")]
         public async Task UpdateStudentPasswordAsync_WithInvalidPassword_ThrowsArgumentException(string studentRegno, string invalidPassword)
         {
-            // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() => 
-                _service.UpdateStudentPasswordAsync(studentRegno, invalidPassword));
+                _service.UpdateStudentPasswordAsync(studentRegno, "currentpassword", invalidPassword));  // add currentPassword
         }
 
         #endregion

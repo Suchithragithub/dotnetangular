@@ -29,184 +29,183 @@ namespace ModernApiProject.Application.Services
         }
 
         public async Task<bool> ValidateAdminPasswordAsync(string password)
-{
-    if (string.IsNullOrWhiteSpace(password))
-    {
-        throw new ArgumentException("Password cannot be null or empty.", nameof(password));
-    }
+        {
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentException("Password cannot be null or empty.", nameof(password));
+            }
 
-    var admin = await _context.Admins
-        .AsNoTracking()
-        .FirstOrDefaultAsync(a => a.Password == password);
+            var admin = await _context.Admins
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Password == password);
 
-    return admin != null;
-}
+            return admin != null;
+        }
 
-        public async Task<bool> UpdateAdminPasswordAsync(string oldPassword, string newPassword)
-{
-    if (string.IsNullOrWhiteSpace(oldPassword))
-    {
-        throw new ArgumentException("Old password cannot be null or empty.", nameof(oldPassword));
-    }
-
-    if (string.IsNullOrWhiteSpace(newPassword))
-    {
-        throw new ArgumentException("New password cannot be null or empty.", nameof(newPassword));
-    }
-
-    var admin = await _context.Admins
-        .FirstOrDefaultAsync(a => a.Password == oldPassword);
-
-    if (admin == null)
-    {
-        return false;
-    }
-
-    admin.Password = newPassword;
-    admin.UpdationDate = DateTime.UtcNow;
-
-    _context.Admins.Update(admin);
-    await _context.SaveChangesAsync();
-
-    return true;
-}
+            // AFTER (correct — looks up admin by username)
+        public async Task<bool> UpdateAdminPasswordAsync(string username, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                throw new ArgumentException("Username cannot be null or empty.", nameof(username));
+    
+            if (string.IsNullOrWhiteSpace(newPassword))
+                throw new ArgumentException("New password cannot be null or empty.", nameof(newPassword));
+    
+            var admin = await _context.Admins
+                .FirstOrDefaultAsync(a => a.Username == username);  // ← FIXED
+    
+            if (admin == null)
+            {
+                _logger.LogWarning("Admin with username {Username} not found during password update.", username);
+                return false;
+            }
+    
+            admin.Password = newPassword;
+            admin.UpdationDate = DateTime.UtcNow;
+    
+            _context.Admins.Update(admin);
+            await _context.SaveChangesAsync();
+    
+            _logger.LogInformation("Password updated successfully for admin {Username}.", username);
+            return true;
+        }
 
         public async Task<bool> CheckStudentRegnoAvailabilityAsync(string regno)
-{
-    if (string.IsNullOrWhiteSpace(regno))
-    {
-        throw new ArgumentException("Registration number cannot be null or empty.", nameof(regno));
-    }
+        {
+            if (string.IsNullOrWhiteSpace(regno))
+            {
+                throw new ArgumentException("Registration number cannot be null or empty.", nameof(regno));
+            }
 
-    var exists = await _context.Students
-        .AsNoTracking()
-        .AnyAsync(s => s.StudentRegno == regno);
+            var exists = await _context.Students
+                .AsNoTracking()
+                .AnyAsync(s => s.StudentRegno == regno);
 
-    return exists;
-}
+            return exists;
+        }
 
         public async Task<CourseModel> CreateCourseAsync(string courseCode, string courseName, string courseUnit, int seatLimit)
-{
-    if (string.IsNullOrWhiteSpace(courseCode))
-    {
-        throw new ArgumentException("Course code cannot be null or empty.", nameof(courseCode));
-    }
+        {
+            if (string.IsNullOrWhiteSpace(courseCode))
+            {
+                throw new ArgumentException("Course code cannot be null or empty.", nameof(courseCode));
+            }
 
-    if (string.IsNullOrWhiteSpace(courseName))
-    {
-        throw new ArgumentException("Course name cannot be null or empty.", nameof(courseName));
-    }
+            if (string.IsNullOrWhiteSpace(courseName))
+            {
+                throw new ArgumentException("Course name cannot be null or empty.", nameof(courseName));
+            }
 
-    if (string.IsNullOrWhiteSpace(courseUnit))
-    {
-        throw new ArgumentException("Course unit cannot be null or empty.", nameof(courseUnit));
-    }
+            if (string.IsNullOrWhiteSpace(courseUnit))
+            {
+                throw new ArgumentException("Course unit cannot be null or empty.", nameof(courseUnit));
+            }
 
-    if (seatLimit <= 0)
-    {
-        throw new ArgumentException("Seat limit must be greater than zero.", nameof(seatLimit));
-    }
+            if (seatLimit <= 0)
+            {
+                throw new ArgumentException("Seat limit must be greater than zero.", nameof(seatLimit));
+            }
 
-    var course = new Course
-    {
-        CourseCode = courseCode,
-        CourseName = courseName,
-        CourseUnit = courseUnit,
-        NoofSeats = seatLimit,
-        CreationDate = DateTime.UtcNow,
-        UpdationDate = ""
-    };
+            var course = new Course
+            {
+                CourseCode = courseCode,
+                CourseName = courseName,
+                CourseUnit = courseUnit,
+                NoofSeats = seatLimit,
+                CreationDate = DateTime.UtcNow,
+                UpdationDate = ""
+            };
 
-    await _context.Courses.AddAsync(course);
-    await _context.SaveChangesAsync();
+            await _context.Courses.AddAsync(course);
+            await _context.SaveChangesAsync();
 
-    return new CourseModel
-    {
-        Id = course.Id,
-        CourseCode = course.CourseCode,
-        CourseName = course.CourseName,
-        CourseUnit = course.CourseUnit,
-        NoofSeats = course.NoofSeats,
-        CreationDate = course.CreationDate,
-        UpdationDate = course.UpdationDate
-    };
-}
+            return new CourseModel
+            {
+                Id = course.Id,
+                CourseCode = course.CourseCode,
+                CourseName = course.CourseName,
+                CourseUnit = course.CourseUnit,
+                NoofSeats = course.NoofSeats,
+                CreationDate = course.CreationDate,
+                UpdationDate = course.UpdationDate
+            };
+        }
 
         public async Task<bool> DeleteCourseWithDependencyCheckAsync(int courseId)
-{
-    if (courseId <= 0)
-    {
-        throw new ArgumentException("Course ID must be greater than zero.", nameof(courseId));
-    }
+        {
+            if (courseId <= 0)
+            {
+                throw new ArgumentException("Course ID must be greater than zero.", nameof(courseId));
+            }
 
-    var course = await _context.Courses.FindAsync(courseId);
-    if (course == null)
-    {
-        return false;
-    }
+            var course = await _context.Courses.FindAsync(courseId);
+            if (course == null)
+            {
+                return false;
+            }
 
-    var hasDependentEnrollments = await _context.Courseenrolls
-        .AsNoTracking()
-        .AnyAsync(ce => ce.Course == courseId);
+            var hasDependentEnrollments = await _context.Courseenrolls
+                .AsNoTracking()
+                .AnyAsync(ce => ce.Course == courseId);
 
-    if (hasDependentEnrollments)
-    {
-        _logger.LogWarning("Cannot delete course {CourseId} because it has dependent enrollment records.", courseId);
-        return false;
-    }
+            if (hasDependentEnrollments)
+            {
+                _logger.LogWarning("Cannot delete course {CourseId} because it has dependent enrollment records.", courseId);
+                return false;
+            }
 
-    _context.Courses.Remove(course);
-    await _context.SaveChangesAsync();
+            _context.Courses.Remove(course);
+            await _context.SaveChangesAsync();
 
-    return true;
-}
+            return true;
+        }
 
         public async Task<IEnumerable<CourseModel>> GetAllCoursesAsync()
-{
-    _logger.LogInformation("Retrieving all courses");
-    
-    var courses = await _context.Courses
-        .AsNoTracking()
-        .OrderBy(c => c.CourseName)
-        .ToListAsync();
-    
-    return courses.Select(c => new CourseModel
-    {
-        Id = c.Id,
-        CourseCode = c.CourseCode,
-        CourseName = c.CourseName,
-        CourseUnit = c.CourseUnit,
-        NoofSeats = c.NoofSeats,
-        CreationDate = c.CreationDate,
-        UpdationDate = c.UpdationDate
-    });
-}
+        {
+            _logger.LogInformation("Retrieving all courses");
+            
+            var courses = await _context.Courses
+                .AsNoTracking()
+                .OrderBy(c => c.CourseName)
+                .ToListAsync();
+            
+            return courses.Select(c => new CourseModel
+            {
+                Id = c.Id,
+                CourseCode = c.CourseCode,
+                CourseName = c.CourseName,
+                CourseUnit = c.CourseUnit,
+                NoofSeats = c.NoofSeats,
+                CreationDate = c.CreationDate,
+                UpdationDate = c.UpdationDate
+            });
+        }
 
         public async Task<DepartmentModel> CreateDepartmentAsync(string departmentName)
-{
-    if (string.IsNullOrWhiteSpace(departmentName))
-    {
-        throw new ArgumentException("Department name cannot be null or empty.", nameof(departmentName));
-    }
-    
-    _logger.LogInformation("Creating new department: {DepartmentName}", departmentName);
-    
-    var department = new Department
-    {
-        DepartmentName = departmentName,
-        CreationDate = DateTime.UtcNow
-    };
-    
-    await _context.Departments.AddAsync(department);
-    await _context.SaveChangesAsync();
-    
-    return new DepartmentModel
-    {
-        Id = department.Id,
-        DepartmentName = department.DepartmentName,
-        CreationDate = department.CreationDate
-    };
-}
+        {
+            if (string.IsNullOrWhiteSpace(departmentName))
+            {
+                throw new ArgumentException("Department name cannot be null or empty.", nameof(departmentName));
+            }
+            
+            _logger.LogInformation("Creating new department: {DepartmentName}", departmentName);
+            
+            var department = new Department
+            {
+                DepartmentName = departmentName,
+                CreationDate = DateTime.UtcNow
+            };
+            
+            await _context.Departments.AddAsync(department);
+            await _context.SaveChangesAsync();
+            
+            return new DepartmentModel
+            {
+                Id = department.Id,
+                DepartmentName = department.DepartmentName,
+                CreationDate = department.CreationDate
+            };
+        }
 
         public async Task<bool> DeleteDepartmentAsync(int id)
 {

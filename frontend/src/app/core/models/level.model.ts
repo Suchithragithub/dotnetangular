@@ -1,5 +1,7 @@
 export interface Level {
-  id: number;
+  id?: number;
   levelName?: string;
+  levelname?: string;
+  name?: string;
   creationDate?: string;
 }

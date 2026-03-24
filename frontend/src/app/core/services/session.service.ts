@@ -14,16 +14,20 @@ export class SessionService {
    * @returns Observable of Session array
    */
   getSessions(): Observable<Session[]> {
-    return this.http.get<Session[]>(`${this.apiUrl}/api/sessions`);
+    return this.http.get<Session[]>(`${this.apiUrl}/api/Admin/sessions`);
   }
 
+  // Add new (used by student enrollment)
+  getSessionsForEnrollment(): Observable<Session[]> {
+    return this.http.get<Session[]>(`${this.apiUrl}/api/Standalone/sessions`);
+  }
   /**
    * Create new academic session
    * @param session - Session object to create
    * @returns Observable of created Session
    */
   createSession(session: Session): Observable<Session> {
-    return this.http.post<Session>(`${this.apiUrl}/api/sessions`, session);
+    return this.http.post<Session>(`${this.apiUrl}/api/Admin/sessions`, session);
   }
 
   /**
@@ -32,6 +36,6 @@ export class SessionService {
    * @returns Observable of void
    */
   deleteSession(id: number | string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/sessions/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/api/Admin/sessions/${id}`);
   }
 }

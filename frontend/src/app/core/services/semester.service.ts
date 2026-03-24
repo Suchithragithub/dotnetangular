@@ -14,16 +14,20 @@ export class SemesterService {
    * @returns Observable of Semester array
    */
   getAllSemesters(): Observable<Semester[]> {
-    return this.http.get<Semester[]>(`${this.apiUrl}/api/semesters`);
+    return this.http.get<Semester[]>(`${this.apiUrl}/api/Admin/semesters`);
   }
 
+  getSemestersForEnrollment(): Observable<Semester[]> {
+    return this.http.get<Semester[]>(`${this.apiUrl}/api/Standalone/semesters`);
+  }
   /**
    * Create new semester
    * @param semester - The semester data to create
    * @returns Observable of created Semester
    */
+  // semester.service.ts
   createSemester(semester: Semester): Observable<Semester> {
-    return this.http.post<Semester>(`${this.apiUrl}/api/semesters`, semester);
+    return this.http.post<Semester>(`${this.apiUrl}/api/Admin/semesters`, semester);
   }
 
   /**
@@ -32,6 +36,6 @@ export class SemesterService {
    * @returns Observable of void
    */
   deleteSemester(id: number | string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/semesters/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/api/Admin/semesters/${id}`);
   }
 }

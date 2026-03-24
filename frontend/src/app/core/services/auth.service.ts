@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Student, Admin, UserLog } from '../models';
@@ -35,10 +35,27 @@ export class AuthService {
    * POST /api/auth/student/login
    */
   studentLogin(credentials: StudentLoginRequest): Observable<StudentLoginResponse> {
+    let params = new HttpParams()
+      .set('regno', credentials.regno)
+      .set('password', credentials.password);
     return this.http.post<StudentLoginResponse>(
-      `${this.apiUrl}/api/auth/student/login`,
-      credentials
+      `${this.apiUrl}/api/Standalone/login`,
+      null, { params }
     );
+  }
+
+  logActivity(regno: string, status: number) {
+    return this.http.post(`${this.apiUrl}/api/Standalone/login-log?studentRegno=${regno}&status=${status}`, null);
+  }
+
+  getCurrentUser(): any {
+    const studentStr = localStorage.getItem('student');
+    return studentStr ? JSON.parse(studentStr) : null;
+  }
+
+  isStudent(): boolean {
+  // Returns true ONLY if 'student' exists in localStorage
+    return !!localStorage.getItem('student');
   }
 
   /**
@@ -47,13 +64,13 @@ export class AuthService {
    */
   adminLogin(credentials: AdminLoginRequest): Observable<AdminLoginResponse> {
     return this.http.post<AdminLoginResponse>(
-      `${this.apiUrl}/api/auth/admin/login`,
+      `${this.apiUrl}/api/Admin/login`,
       credentials
     );
   }
 
   isAdmin(): boolean {
-    return !!localStorage.getItem('admin');
+    return !!localStorage.getItem('adminUser');
   }
 
   isLoggedIn(): boolean {
@@ -63,7 +80,7 @@ export class AuthService {
   // ✅ ADD THIS METHOD
   logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('admin');
+    localStorage.removeItem('adminUser');
     localStorage.removeItem('student');
   }
 }

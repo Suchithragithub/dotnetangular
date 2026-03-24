@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UserlogService } from '../../../../core/services/userlog.service';
@@ -8,8 +8,8 @@ import { UserLog } from '../../../../core/models/user-log.model';
   selector: 'app-admin-user-log',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './admin-user-log.component.html',
-  styleUrls: ['./admin-user-log.component.scss']
+  templateUrl: './user-log.component.html',
+  styleUrls: ['./user-log.component.scss']
 })
 export class AdminUserLogComponent implements OnInit {
   private userlogService = inject(UserlogService);
@@ -66,7 +66,7 @@ export class AdminUserLogComponent implements OnInit {
     // Filter by activity type
     if (this.filterType() !== 'all') {
       filtered = filtered.filter(log => 
-        log.activity?.toLowerCase() === this.filterType()
+        (log.status === 1 ? 'login' : 'logout') === this.filterType()
       );
     }
 
@@ -74,16 +74,15 @@ export class AdminUserLogComponent implements OnInit {
     const search = this.searchTerm().toLowerCase().trim();
     if (search) {
       filtered = filtered.filter(log => 
-        log.regNumber?.toLowerCase().includes(search) ||
-        log.studentName?.toLowerCase().includes(search) ||
-        log.ipAddress?.toLowerCase().includes(search)
+        (log.studentRegno || '').toLowerCase().includes(search) ||
+        (log.userip || '').toLowerCase().includes(search)
       );
     }
 
     // Sort by timestamp descending (most recent first)
     filtered.sort((a, b) => {
-      const dateA = new Date(a.timestamp || 0).getTime();
-      const dateB = new Date(b.timestamp || 0).getTime();
+      const dateA = new Date(a.loginTime || 0).getTime();
+      const dateB = new Date(b.loginTime || 0).getTime();
       return dateB - dateA;
     });
 
@@ -152,11 +151,11 @@ export class AdminUserLogComponent implements OnInit {
   exportToCSV(): void {
     const headers = ['Timestamp', 'Registration Number', 'Student Name', 'Activity', 'IP Address'];
     const rows = this.filteredLogs().map(log => [
-      this.formatTimestamp(log.timestamp),
-      log.regNumber || '',
-      log.studentName || '',
-      log.activity || '',
-      log.ipAddress || ''
+      this.formatTimestamp(log.loginTime),
+      log.studentRegno || '',
+      '',
+      log.status === 1 ? 'login' : 'logout',
+      log.userip || ''
     ]);
 
     let csvContent = headers.join(',') + '\n';
@@ -177,5 +176,21 @@ export class AdminUserLogComponent implements OnInit {
 
   refresh(): void {
     this.loadUserLogs();
+  }
+
+  visibleRangeEnd(): number {
+    return Math.min(this.currentPage() * this.itemsPerPage, this.filteredLogs().length);
+  }
+
+  loginCount(): number {
+    return this.userLogs().filter((log) => log.status === 1).length;
+  }
+
+  logoutCount(): number {
+    return this.userLogs().filter((log) => log.status !== 1).length;
+  }
+
+  trackByLogId(_index: number, log: UserLog): number {
+    return log.id;
   }
 }

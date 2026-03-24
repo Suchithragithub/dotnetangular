@@ -8,8 +8,8 @@ import { AuthService } from '../../../../core/services/auth.service';
   selector: 'app-admin-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './admin-login.component.html',
-  styleUrls: ['./admin-login.component.scss']
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class AdminLoginComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -55,9 +55,13 @@ export class AdminLoginComponent implements OnInit {
         this.loading.set(false);
         // Store admin authentication token/session if provided in response
         if (response && response.token) {
-          localStorage.setItem('adminToken', response.token);
+          localStorage.setItem('token', response.token);
           localStorage.setItem('adminUser', JSON.stringify(response.admin));
         }
+
+        // ✅ Clear any stale student session
+        localStorage.removeItem('student');
+        
         // Navigate to admin dashboard
         this.router.navigate(['/admin/dashboard']);
       },

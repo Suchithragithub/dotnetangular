@@ -8,11 +8,18 @@ using ModernApiProject.Infrastructure.Repositories;
 using ModernApiProject.Application.Interfaces;
 using ModernApiProject.Application.Services;
 using System.Text;
+using System.Text.Json; // add this
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+// builder.Services.AddControllers();
+// Program.cs — ensure camelCase JSON handling is on (it's the default, but be explicit)
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
 // Add Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

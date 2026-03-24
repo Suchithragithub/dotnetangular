@@ -14,7 +14,10 @@ export class LevelService {
    * @returns Observable of Level array
    */
   getLevels(): Observable<Level[]> {
-    return this.http.get<Level[]>(`${this.apiUrl}/api/levels`);
+    return this.http.get<Level[]>(`${this.apiUrl}/api/Admin/levels`);
+  }
+  getLevelsForEnrollment(): Observable<Level[]> {
+    return this.http.get<Level[]>(`${this.apiUrl}/api/Standalone/levels`);
   }
 
   /**
@@ -23,7 +26,7 @@ export class LevelService {
    * @returns Observable of created Level
    */
   createLevel(level: Level): Observable<Level> {
-    return this.http.post<Level>(`${this.apiUrl}/api/levels`, level);
+    return this.http.post<Level>(`${this.apiUrl}/api/Admin/levels`, level);
   }
 
   /**
@@ -32,6 +35,6 @@ export class LevelService {
    * @returns Observable of void
    */
   deleteLevel(id: number | string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/levels/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/api/Admin/levels/${id}`);
   }
 }

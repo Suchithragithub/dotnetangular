@@ -11,7 +11,7 @@ namespace ModernApiProject.Application.Interfaces
     {
         Task<bool> ValidateStudentPasswordAsync(string studentRegno, string password);
 
-        Task<bool> UpdateStudentPasswordAsync(string studentRegno, string newPassword);
+        Task<bool> UpdateStudentPasswordAsync(string studentRegno, string currentPassword, string newPassword);
 
         Task<bool> IsStudentEnrolledInCourseAsync(string studentRegno, int courseId);
 
@@ -29,13 +29,13 @@ namespace ModernApiProject.Application.Interfaces
 
         Task<bool> UpdateUserlogLogoutAsync(string studentRegno, DateTime logoutDate);
 
-        Task<bool> UpdateStudentProfileAsync(string studentRegno, string studentName, string studentPhoto, decimal cgpa);
+        Task<bool> UpdateStudentProfileAsync(string studentRegno, string studentName, string? studentPhoto, decimal cgpa);
 
         Task<StudentModel?> GetStudentByPincodeAsync(string pincode);
 
         Task<CourseEnrollmentDetailModel?> GetPrintableCourseEnrollmentDetailsAsync(string studentRegno);
 
-        Task<IEnumerable<CourseenrollModel>> GetEnrollmentHistoryByStudentAsync(string studentRegno);
+        Task<IEnumerable<CourseEnrollmentDetailModel>> GetEnrollmentHistoryByStudentAsync(string studentRegno);
         Task<IEnumerable<SessionModel>> GetAllSessionsAsync();
         Task<IEnumerable<DepartmentModel>> GetAllDepartmentsAsync();
         Task<IEnumerable<LevelModel>> GetAllLevelsForEnrollmentAsync();

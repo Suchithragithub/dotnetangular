@@ -2,45 +2,25 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { StudentService } from '../../services/student.service';
-import { EnrollmentService } from '../../services/enrollment.service';
-import { SessionService } from '../../services/session.service';
-import { DepartmentService } from '../../services/department.service';
-import { LevelService } from '../../services/level.service';
-import { SemesterService } from '../../services/semester.service';
-import { CourseService } from '../../services/course.service';
-import { AuthService } from '../../services/auth.service';
-import { Student } from '../../models/student.model';
-import { Session } from '../../models/session.model';
-import { Department } from '../../models/department.model';
-import { Level } from '../../models/level.model';
-import { Semester } from '../../models/semester.model';
-import { Course } from '../../models/course.model';
-
-interface AvailabilityCheckRequest {
-  studentregno: string;
-  courseId: number;
-  sessionId: number;
-  departmentId: number;
-  levelId: number;
-  semesterId: number;
-}
-
-interface AvailabilityCheckResponse {
-  available: boolean;
-  message?: string;
-  alreadyEnrolled?: boolean;
-  seatsAvailable?: boolean;
-}
-
-interface EnrollmentRequest {
-  studentregno: string;
-  sessionId: number;
-  departmentId: number;
-  levelId: number;
-  semesterId: number;
-  courseId: number;
-}
+import { StudentService } from '../../core/services/student.service';
+import {
+  AvailabilityResponse,
+  CheckAvailabilityRequest,
+  CreateEnrollmentRequest,
+  EnrollmentService
+} from '../../core/services/enrollment.service';
+import { SessionService } from '../../core/services/session.service';
+import { DepartmentService } from '../../core/services/department.service';
+import { LevelService } from '../../core/services/level.service';
+import { SemesterService } from '../../core/services/semester.service';
+import { CourseService } from '../../core/services/course.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Student } from '../../core/models/student.model';
+import { Session } from '../../core/models/session.model';
+import { Department } from '../../core/models/department.model';
+import { Level } from '../../core/models/level.model';
+import { Semester } from '../../core/models/semester.model';
+import { Course } from '../../core/models/course.model';
 
 @Component({
   selector: 'app-enroll',
@@ -65,6 +45,7 @@ export class EnrollComponent implements OnInit {
   error = signal<string | null>(null);
   success = signal<string | null>(null);
   pincodeVerified = signal(false);
+  verifiedPincode = signal<string | null>(null);
   studentData = signal<Student | null>(null);
 
   sessions = signal<Session[]>([]);
@@ -100,11 +81,11 @@ export class EnrollComponent implements OnInit {
     this.error.set(null);
 
     Promise.all([
-      this.sessionService.getSessions().toPromise(),
-      this.departmentService.getDepartments().toPromise(),
-      this.levelService.getLevels().toPromise(),
-      this.semesterService.getSemesters().toPromise(),
-      this.courseService.getCourses().toPromise()
+      this.sessionService.getSessionsForEnrollment().toPromise(),       // ← new method
+      this.departmentService.getDepartmentsForEnrollment().toPromise(), // ← new method
+      this.levelService.getLevelsForEnrollment().toPromise(),           // ← new method
+      this.semesterService.getSemestersForEnrollment().toPromise(),     // ← new method
+      this.courseService.getCoursesForEnrollment().toPromise()          // ← new method
     ])
       .then(([sessions, departments, levels, semesters, courses]) => {
         this.sessions.set(sessions || []);
@@ -138,9 +119,10 @@ export class EnrollComponent implements OnInit {
 
     this.studentService.getStudentByRegno(regno).subscribe({
       next: (student: Student) => {
-        if (student.Pincode === pincode) {
+        if (student.pincode === pincode) {
           this.studentData.set(student);
           this.pincodeVerified.set(true);
+          this.verifiedPincode.set(pincode);
           this.success.set('Pincode verified successfully. Please complete the enrollment form.');
           this.loading.set(false);
         } else {
@@ -173,47 +155,23 @@ export class EnrollComponent implements OnInit {
     this.error.set(null);
     this.success.set(null);
 
-    const formValue = this.enrollmentForm.value;
-    const studentregno = this.studentData()!.regno;
-
-    const availabilityCheck: AvailabilityCheckRequest = {
-      studentregno: studentregno,
-      courseId: parseInt(formValue.course),
-      sessionId: parseInt(formValue.session),
-      departmentId: parseInt(formValue.department),
-      levelId: parseInt(formValue.level),
-      semesterId: parseInt(formValue.sem)
-    };
-
-    this.enrollmentService.checkAvailability(availabilityCheck).subscribe({
-      next: (response: AvailabilityCheckResponse) => {
-        if (response.available) {
-          this.createEnrollment();
-        } else {
-          if (response.alreadyEnrolled) {
-            this.error.set('You are already enrolled in this course for the selected session.');
-          } else if (response.seatsAvailable === false) {
-            this.error.set('No seats available for this course. Enrollment limit reached.');
-          } else {
-            this.error.set(response.message || 'Enrollment not available.');
-          }
-          this.loading.set(false);
-        }
-      },
-      error: (err) => {
-        this.error.set('Failed to check enrollment availability. Please try again.');
-        this.loading.set(false);
-        console.error('Error checking availability:', err);
-      }
-    });
+    this.createEnrollment();
   }
 
   private createEnrollment(): void {
     const formValue = this.enrollmentForm.value;
-    const studentregno = this.studentData()!.regno;
+    const studentregno = this.studentData()!.studentRegno;
+    const pincode = this.verifiedPincode();
 
-    const enrollmentData: EnrollmentRequest = {
+    if (!pincode) {
+      this.error.set('Pincode verification has expired. Please verify again.');
+      this.loading.set(false);
+      return;
+    }
+
+    const enrollmentData: CreateEnrollmentRequest = {
       studentregno: studentregno,
+      pincode: pincode,
       sessionId: parseInt(formValue.session),
       departmentId: parseInt(formValue.department),
       levelId: parseInt(formValue.level),
@@ -232,9 +190,15 @@ export class EnrollComponent implements OnInit {
         }, 2000);
       },
       error: (err) => {
-        this.error.set('Failed to create enrollment. Please try again.');
         this.loading.set(false);
-        console.error('Error creating enrollment:', err);
+        console.log('❌ Enrollment error:', err);
+        if (err.status === 400) {
+          this.error.set(err.error?.message || 'Enrollment failed. You may already be enrolled or seats are full.');
+        } else if (err.status === 401) {
+          this.error.set('Session expired. Please log in again.');
+        } else {
+          this.error.set('Failed to create enrollment. Please try again.');
+        }
       }
     });
   }
@@ -243,6 +207,7 @@ export class EnrollComponent implements OnInit {
     this.pincodeForm.reset();
     this.enrollmentForm.reset();
     this.pincodeVerified.set(false);
+    this.verifiedPincode.set(null);
     this.studentData.set(null);
     this.error.set(null);
     this.success.set(null);

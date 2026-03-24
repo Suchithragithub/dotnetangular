@@ -150,7 +150,7 @@
               <select class="form-select" id="sessionId" formControlName="sessionId">
                 <option value="">-- Select Session (Optional) --</option>
                 <option *ngFor="let session of sessions()" [value]="session.id">
-                  {{ session.sessionname }}
+                  {{ session.sessionName }}
                 </option>
               </select>
             </div>
@@ -161,7 +161,7 @@
               <select class="form-select" id="departmentId" formControlName="departmentId">
                 <option value="">-- Select Department (Optional) --</option>
                 <option *ngFor="let department of departments()" [value]="department.id">
-                  {{ department.departmentname }}
+                  {{ department.departmentName }}
                 </option>
               </select>
             </div>
@@ -172,7 +172,7 @@
               <select class="form-select" id="levelId" formControlName="levelId">
                 <option value="">-- Select Level (Optional) --</option>
                 <option *ngFor="let level of levels()" [value]="level.id">
-                  {{ level.levelname }}
+                  {{ level.levelName }}
                 </option>
               </select>
             </div>

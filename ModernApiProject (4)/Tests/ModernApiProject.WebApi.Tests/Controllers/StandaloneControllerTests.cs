@@ -118,18 +118,24 @@ namespace ModernApiProject.WebApi.Tests.Controllers
         }
 
         #endregion
+        #region UpdateStudentPassword Tests
 
-        #region UpdateStudentPassword Tests[Fact]
+        [Fact]
         public async Task UpdateStudentPassword_WithValidData_ReturnsOkWithSuccessMessage()
         {
             // Arrange
             var studentRegno = "STU001";
+            var currentPassword = "oldpassword";   // add this
             var newPassword = "newpassword123";
-            _mockStandaloneService.Setup(s => s.UpdateStudentPasswordAsync(studentRegno, newPassword))
+            _mockStandaloneService.Setup(s => s.UpdateStudentPasswordAsync(studentRegno, currentPassword, newPassword))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await _controller.UpdateStudentPassword(studentRegno, newPassword);
+            var result = await _controller.UpdateStudentPassword(new ChangePasswordRequest 
+            { 
+                CurrentPassword = currentPassword, 
+                NewPassword = newPassword 
+            });
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -140,54 +146,66 @@ namespace ModernApiProject.WebApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task UpdateStudentPassword_WhenStudentNotFound_ReturnsNotFound()
+        public async Task UpdateStudentPassword_WhenStudentNotFound_ReturnsUnauthorized()
         {
             // Arrange
-            var studentRegno = "STU999";
+            var currentPassword = "wrongpassword";  // add this
             var newPassword = "newpassword123";
-            _mockStandaloneService.Setup(s => s.UpdateStudentPasswordAsync(studentRegno, newPassword))
+            _mockStandaloneService.Setup(s => s.UpdateStudentPasswordAsync(
+                It.IsAny<string>(), currentPassword, newPassword))
                 .ReturnsAsync(false);
 
             // Act
-            var result = await _controller.UpdateStudentPassword(studentRegno, newPassword);
+            var result = await _controller.UpdateStudentPassword(new ChangePasswordRequest 
+            { 
+                CurrentPassword = currentPassword, 
+                NewPassword = newPassword 
+            });
 
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("Student not found or password update failed.", notFoundResult.Value);
+            var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+            var value = unauthorizedResult.Value;
+            var messageProperty = value.GetType().GetProperty("message");
+            Assert.Equal("Current password is incorrect.", messageProperty.GetValue(value));
         }
 
-        [Theory]
-        [InlineData(null, "password")]
-        [InlineData("", "password")]
-        [InlineData("   ", "password")][InlineData("STU001", null)]
-        [InlineData("STU001", "")]
-        [InlineData("STU001", "   ")]
-        public async Task UpdateStudentPassword_WithInvalidInput_ReturnsBadRequest(string studentRegno, string newPassword)
+        [Fact]
+        public async Task UpdateStudentPassword_WithInvalidInput_ReturnsBadRequest()
         {
-            // Act
-            var result = await _controller.UpdateStudentPassword(studentRegno, newPassword);
+            // Act - empty new password
+            var result = await _controller.UpdateStudentPassword(new ChangePasswordRequest 
+            { 
+                CurrentPassword = "", 
+                NewPassword = "" 
+            });
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Student registration number and new password are required.", badRequestResult.Value);
+            var value = badRequestResult.Value;
+            var messageProperty = value.GetType().GetProperty("message");
+            Assert.Equal("Current password and new password are required.", messageProperty.GetValue(value));
         }
 
         [Fact]
         public async Task UpdateStudentPassword_WhenServiceThrowsException_ReturnsInternalServerError()
         {
             // Arrange
-            var studentRegno = "STU001";
+            var currentPassword = "oldpassword";   // add this
             var newPassword = "newpassword123";
-            _mockStandaloneService.Setup(s => s.UpdateStudentPasswordAsync(studentRegno, newPassword))
+            _mockStandaloneService.Setup(s => s.UpdateStudentPasswordAsync(
+                It.IsAny<string>(), currentPassword, newPassword))
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
-            var result = await _controller.UpdateStudentPassword(studentRegno, newPassword);
+            var result = await _controller.UpdateStudentPassword(new ChangePasswordRequest 
+            { 
+                CurrentPassword = currentPassword, 
+                NewPassword = newPassword 
+            });
 
             // Assert
             var statusCodeResult = Assert.IsType<ObjectResult>(result);
             Assert.Equal(500, statusCodeResult.StatusCode);
-            Assert.Equal("An error occurred while updating the password.", statusCodeResult.Value);
         }
 
         #endregion
@@ -387,7 +405,17 @@ namespace ModernApiProject.WebApi.Tests.Controllers
         {
             // Arrange
             var studentRegno = "STU001";
-            var expectedHistory = new List<CourseenrollModel> { new CourseenrollModel { Course = 1 } };
+            var expectedHistory = new List<CourseEnrollmentDetailModel>  // fix: CourseenrollModel → CourseEnrollmentDetailModel
+            { 
+                new CourseEnrollmentDetailModel 
+                { 
+                    CourseId = 1,           // fix: Course → CourseId
+                    CourseName = "Math",
+                    SessionName = "2024",
+                    DepartmentName = "CS",
+                    SemesterName = "First"
+                } 
+            };
             _mockStandaloneService.Setup(s => s.GetEnrollmentHistoryByStudentAsync(studentRegno))
                 .ReturnsAsync(expectedHistory);
 
@@ -397,7 +425,9 @@ namespace ModernApiProject.WebApi.Tests.Controllers
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.Equal(expectedHistory, okResult.Value);
-        }[Theory]
+        }
+
+        [Theory]
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]

@@ -9,7 +9,7 @@ namespace ModernApiProject.Application.Interfaces
     public interface IAdminService
     {
         Task<bool> ValidateAdminPasswordAsync(string password);
-        Task<bool> UpdateAdminPasswordAsync(string oldPassword, string newPassword);
+        Task<bool> UpdateAdminPasswordAsync(string username, string newPassword);
         Task<bool> CheckStudentRegnoAvailabilityAsync(string regno);
         Task<CourseModel> CreateCourseAsync(string courseCode, string courseName, string courseUnit, int seatLimit);
         Task<bool> DeleteCourseWithDependencyCheckAsync(int courseId);

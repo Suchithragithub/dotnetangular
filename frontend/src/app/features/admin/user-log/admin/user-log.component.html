@@ -6,23 +6,23 @@
       <p class="text-muted">Student login and logout activity audit trail</p>
     </div>
     <div class="col-auto">
-      <button 
-        class="btn btn-outline-primary me-2" 
-        (click)="refresh()" 
+      <button
+        class="btn btn-outline-primary me-2"
+        (click)="refresh()"
         [disabled]="loading()"
         title="Refresh logs">
         <i class="bi bi-arrow-clockwise"></i> Refresh
       </button>
-      <button 
-        class="btn btn-outline-success" 
-        (click)="exportToCSV()" 
+      <button
+        class="btn btn-outline-success"
+        (click)="exportToCSV()"
         [disabled]="loading() || filteredLogs().length === 0"
         title="Export to CSV">
         <i class="bi bi-download"></i> Export CSV
       </button>
     </div>
   </div>
-
+ 
   <!-- Loading Spinner -->
   <div *ngIf="loading()" class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
@@ -30,14 +30,14 @@
     </div>
     <p class="mt-3 text-muted">Loading user activity logs...</p>
   </div>
-
+ 
   <!-- Error Alert -->
   <div *ngIf="error()" class="alert alert-danger alert-dismissible fade show" role="alert">
     <i class="bi bi-exclamation-triangle-fill me-2"></i>
     {{ error() }}
     <button type="button" class="btn-close" (click)="error.set(null)"></button>
   </div>
-
+ 
   <!-- Filters and Search -->
   <div *ngIf="!loading()" class="row mb-4">
     <div class="col-md-6 mb-3 mb-md-0">
@@ -45,17 +45,17 @@
         <span class="input-group-text">
           <i class="bi bi-search"></i>
         </span>
-        <input 
-          type="text" 
-          class="form-control" 
+        <input
+          type="text"
+          class="form-control"
           placeholder="Search by registration number, name, or IP address..."
           (input)="onSearch($event)"
           [value]="searchTerm()">
       </div>
     </div>
     <div class="col-md-3">
-      <select 
-        class="form-select" 
+      <select
+        class="form-select"
         (change)="onFilterTypeChange($event)"
         [value]="filterType()">
         <option value="all">All Activities</option>
@@ -71,7 +71,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- User Logs Table -->
   <div *ngIf="!loading() && filteredLogs().length > 0" class="card shadow-sm">
     <div class="card-body p-0">
@@ -89,56 +89,54 @@
           <tbody>
             <tr *ngFor="let log of paginatedLogs; trackBy: trackByLogId">
               <td class="text-nowrap">
-                <small>{{ formatTimestamp(log.timestamp) }}</small>
+                <small>{{ formatTimestamp(log.loginTime) }}</small>
               </td>
               <td class="text-nowrap">
-                <strong>{{ log.regNumber || 'N/A' }}</strong>
+                <strong>{{ log.studentRegno || 'N/A' }}</strong>
               </td>
               <td>{{ log.studentName || 'N/A' }}</td>
               <td class="text-center">
-                <span 
-                  class="badge rounded-pill" 
-                  [ngClass]="getActivityBadgeClass(log.activity)">
-                  {{ log.activity || 'N/A' }}
+                <span class="badge rounded-pill" [ngClass]="getActivityBadgeClass(log.status === 1 ? 'login' : 'logout')">
+                  {{ log.status === 1 ? 'Login' : 'Logout' }}
                 </span>
               </td>
               <td>
-                <code class="text-muted">{{ log.ipAddress || 'N/A' }}</code>
+                <code class="text-muted">{{ log.userip || 'N/A' }}</code>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-
+ 
     <!-- Pagination -->
     <div *ngIf="totalPages > 1" class="card-footer bg-light">
       <nav aria-label="User logs pagination">
         <ul class="pagination pagination-sm mb-0 justify-content-center">
           <li class="page-item" [class.disabled]="currentPage() === 1">
-            <button 
-              class="page-link" 
+            <button
+              class="page-link"
               (click)="goToPage(currentPage() - 1)"
               [disabled]="currentPage() === 1">
               Previous
             </button>
           </li>
-          <li 
-            *ngFor="let page of pageNumbers" 
-            class="page-item" 
+          <li
+            *ngFor="let page of pageNumbers"
+            class="page-item"
             [class.active]="page === currentPage()"
             [class.disabled]="page === -1">
-            <button 
-              *ngIf="page !== -1" 
-              class="page-link" 
+            <button
+              *ngIf="page !== -1"
+              class="page-link"
               (click)="goToPage(page)">
               {{ page }}
             </button>
             <span *ngIf="page === -1" class="page-link">...</span>
           </li>
           <li class="page-item" [class.disabled]="currentPage() === totalPages">
-            <button 
-              class="page-link" 
+            <button
+              class="page-link"
               (click)="goToPage(currentPage() + 1)"
               [disabled]="currentPage() === totalPages">
               Next
@@ -148,14 +146,14 @@
       </nav>
       <div class="text-center mt-2">
         <small class="text-muted">
-          Showing {{ (currentPage() - 1) * itemsPerPage + 1 }} - 
-          {{ Math.min(currentPage() * itemsPerPage, filteredLogs().length) }} 
+          Showing {{ (currentPage() - 1) * itemsPerPage + 1 }} -
+          {{ visibleRangeEnd() }}
           of {{ filteredLogs().length }} records
         </small>
       </div>
     </div>
   </div>
-
+ 
   <!-- Empty State -->
   <div *ngIf="!loading() && filteredLogs().length === 0" class="card shadow-sm">
     <div class="card-body text-center py-5">
@@ -169,15 +167,15 @@
           There are no user activity logs recorded yet.
         </span>
       </p>
-      <button 
-        *ngIf="searchTerm() || filterType() !== 'all'" 
+      <button
+        *ngIf="searchTerm() || filterType() !== 'all'"
         class="btn btn-primary mt-2"
         (click)="searchTerm.set(''); filterType.set('all'); applyFilters()">
         Clear Filters
       </button>
     </div>
   </div>
-
+ 
   <!-- Statistics Summary -->
   <div *ngIf="!loading() && userLogs().length > 0" class="row mt-4">
     <div class="col-md-4 mb-3">
@@ -192,7 +190,7 @@
       <div class="card bg-success text-white shadow-sm">
         <div class="card-body">
           <h6 class="card-title text-uppercase mb-2">Login Events</h6>
-          <h3 class="mb-0">{{ userLogs().filter(log => log.activity?.toLowerCase() === 'login').length }}</h3>
+          <h3 class="mb-0">{{ loginCount() }}</h3>
         </div>
       </div>
     </div>
@@ -200,7 +198,7 @@
       <div class="card bg-warning text-dark shadow-sm">
         <div class="card-body">
           <h6 class="card-title text-uppercase mb-2">Logout Events</h6>
-          <h3 class="mb-0">{{ userLogs().filter(log => log.activity?.toLowerCase() === 'logout').length }}</h3>
+          <h3 class="mb-0">{{ logoutCount() }}</h3>
         </div>
       </div>
     </div>

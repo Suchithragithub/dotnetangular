@@ -100,11 +100,10 @@
               <hr>
               <div class="row">
                 <div class="col-md-6">
-                  <p class="mb-1"><strong>Name:</strong> {{ studentData()?.name }}</p>
-                  <p class="mb-1"><strong>Registration No:</strong> {{ studentData()?.regno }}</p>
+                  <p class="mb-1"><strong>Name:</strong> {{ studentData()?.studentName }}</p>
+                  <p class="mb-1"><strong>Registration No:</strong> {{ studentData()?.studentRegno }}</p>
                 </div>
                 <div class="col-md-6">
-                  <p class="mb-1"><strong>Email:</strong> {{ studentData()?.email }}</p>
                   <p class="mb-0"><strong>CGPA:</strong> {{ studentData()?.cgpa || 'N/A' }}</p>
                 </div>
               </div>
@@ -124,7 +123,7 @@
                   >
                     <option value="">Select Session</option>
                     <option *ngFor="let session of sessions()" [value]="session.id">
-                      {{ session.name }}
+                      {{ session.sessionName }}
                     </option>
                   </select>
                   <div
@@ -147,7 +146,7 @@
                   >
                     <option value="">Select Department</option>
                     <option *ngFor="let dept of departments()" [value]="dept.id">
-                      {{ dept.name }}
+                      {{ dept.departmentName }}
                     </option>
                   </select>
                   <div
@@ -172,7 +171,7 @@
                   >
                     <option value="">Select Level</option>
                     <option *ngFor="let level of levels()" [value]="level.id">
-                      {{ level.name }}
+                      {{ level.levelName }}
                     </option>
                   </select>
                   <div
@@ -195,7 +194,7 @@
                   >
                     <option value="">Select Semester</option>
                     <option *ngFor="let semester of semesters()" [value]="semester.id">
-                      {{ semester.name }}
+                      {{ semester.semesterName }}
                     </option>
                   </select>
                   <div
@@ -219,7 +218,7 @@
                 >
                   <option value="">Select Course</option>
                   <option *ngFor="let course of courses()" [value]="course.id">
-                    {{ course.coursecode }} - {{ course.coursename }} ({{ course.unit }} units)
+                    {{ course.courseCode }} - {{ course.courseName }} ({{ course.courseUnit || '0' }} units)
                   </option>
                 </select>
                 <div

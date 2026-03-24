@@ -5,4 +5,9 @@ export interface UserLog {
   loginTime?: string;
   logout?: string;
   status?: number;
+  regNumber?: string;
+  studentName?: string;
+  activity?: string;
+  ipAddress?: string;
+  timestamp?: string;
 }

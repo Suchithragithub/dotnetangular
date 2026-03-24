@@ -55,7 +55,25 @@ export class LoginComponent implements OnInit {
     this.authService.studentLogin(credentials).subscribe({
       next: (response) => {
         this.loading.set(false);
-        // Navigate to student dashboard on successful login
+
+        // Save login data
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+
+        localStorage.setItem('student', JSON.stringify(response.student));
+
+        // ✅ Clear any stale admin session before navigating
+        localStorage.removeItem('adminUser');
+
+        // Optional: log login activity
+        // this.authService.logActivity(response.student.studentRegno, 1).subscribe();
+        this.authService.logActivity(response.student.studentRegno, 1).subscribe({
+          next: () => console.log('Login log created'),
+          error: (err) => console.error('Login log failed:', err)  // add this to see the error
+        });
+
+        // Navigate after login
         this.router.navigate(['/student/dashboard']);
       },
       error: (err) => {
