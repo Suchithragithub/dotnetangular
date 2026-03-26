@@ -105,10 +105,10 @@
                 id="cgpa"
                 class="form-control"
                 formControlName="cgpa"
-                placeholder="Enter your CGPA (0.00 - 4.00)"
+                placeholder="Enter your CGPA (0.00 - 9.00)"
                 step="0.01"
                 min="0"
-                max="4.0"
+                max="9.0"
                 [class.is-invalid]="profileForm.get('cgpa')?.invalid && profileForm.get('cgpa')?.touched"
               />
               <div

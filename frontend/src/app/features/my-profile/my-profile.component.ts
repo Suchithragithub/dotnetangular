@@ -46,7 +46,7 @@ export class MyProfileComponent implements OnInit {
     this.profileForm = this.fb.group({
       studentname: ['', [Validators.required, Validators.minLength(2)]],
       photo: [''],
-      cgpa: ['', [Validators.required, Validators.min(0), Validators.max(4.0)]]
+      cgpa: ['', [Validators.required, Validators.min(0), Validators.max(9.0)]]
     });
   }
  
